@@ -1,79 +1,51 @@
 package com.mahesh.gdmi.engine
 
-data class MatchState(
-    val score: Int,
-    val overs: Double,
-    val wickets: Int,
-    val marketLine: Double,
-    val recentOverRuns: Double,
-    val oddsOver: Double,
-    val oddsUnder: Double
-)
-
-data class ReverseEdgeResult(
-    val expectedOverRuns: Double,
-    val edge: Double,
-    val signal: String,
-    val confidence: Int
-)
+import kotlin.math.abs
 
 object ReverseEdgeEngine {
 
-    fun analyze(state: MatchState): ReverseEdgeResult {
+    fun calculate(input: GDMInput): GDMResult {
 
-        val balls = oversToBalls(state.overs)
-        val completedOvers = balls / 6.0
+        val gap = input.expected - input.present
+        val targetGap = input.target - input.present
 
-        val crr = if (completedOvers > 0) {
-            state.score / completedOvers
-        } else {
-            0.0
+        val gapScore = abs(gap)
+        val movementEffect = input.movement
+        val riskEffect = input.risk
+        val timingEffect = input.timing
+
+        val edgeScore = (
+            gapScore +
+            movementEffect -
+            riskEffect +
+            timingEffect
+        ).coerceAtLeast(0.0)
+
+        val decision = when {
+            edgeScore >= 70.0 -> "STRONG EDGE"
+            edgeScore >= 50.0 -> "EDGE"
+            edgeScore >= 30.0 -> "WEAK EDGE"
+            else -> "NO CLEAR EDGE"
         }
 
-        // Recent momentum gets more weight than overall CRR.
-        val momentumFactor =
-            (state.recentOverRuns - crr) * 0.35
-
-        // Wicket pressure.
-        val wicketFactor =
-            when {
-                state.wickets >= 7 -> -1.5
-                state.wickets >= 5 -> -0.8
-                state.wickets <= 2 -> 0.5
-                else -> 0.0
-            }
-
-        val expectedRuns =
-            (crr + momentumFactor + wicketFactor)
-                .coerceIn(1.0, 30.0)
-
-        val edge = expectedRuns - state.marketLine
-
-        val signal = when {
-            edge >= 2.0 -> "OVER"
-            edge <= -2.0 -> "UNDER"
-            else -> "WAIT"
+        val explanation = buildString {
+            append("Present = ${input.present}. ")
+            append("Expected = ${input.expected}. ")
+            append("Target = ${input.target}. ")
+            append("Gap = $gap. ")
+            append("Target Gap = $targetGap. ")
+            append("Movement = ${input.movement}. ")
+            append("Risk = ${input.risk}. ")
+            append("Timing = ${input.timing}. ")
+            append("Final Edge Score = ${"%.2f".format(edgeScore)}. ")
+            append("Decision = $decision.")
         }
 
-        val confidence = when {
-            kotlin.math.abs(edge) >= 3.5 -> 90
-            kotlin.math.abs(edge) >= 2.5 -> 80
-            kotlin.math.abs(edge) >= 2.0 -> 70
-            kotlin.math.abs(edge) >= 1.0 -> 55
-            else -> 40
-        }
-
-        return ReverseEdgeResult(
-            expectedOverRuns = expectedRuns,
-            edge = edge,
-            signal = signal,
-            confidence = confidence
+        return GDMResult(
+            gap = gap,
+            edgeScore = edgeScore,
+            decision = decision,
+            explanation = explanation
         )
-    }
-
-    private fun oversToBalls(overs: Double): Int {
-        val wholeOvers = overs.toInt()
-        val balls = ((overs - wholeOvers) * 10).toInt()
-        return wholeOvers * 6 + balls
     }
 }
