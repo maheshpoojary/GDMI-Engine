@@ -21,45 +21,45 @@ class MainActivity : Activity() {
         title.setTextColor(Color.BLACK)
         title.gravity = Gravity.CENTER
 
-        val subtitle = TextView(this)
-        subtitle.text = "General Decision & Mathematical Intelligence Engine"
-        subtitle.textSize = 16f
-        subtitle.gravity = Gravity.CENTER
-        subtitle.setPadding(0, 12, 0, 30)
+        layout.addView(title)
 
-        val scoreInput = EditText(this)
-        scoreInput.hint = "Current Score (e.g. 122)"
+        val info = TextView(this)
+        info.text = "General Decision & Mathematical Intelligence Engine"
+        info.textSize = 18f
+        info.gravity = Gravity.CENTER
+        layout.addView(info)
 
-        val oversInput = EditText(this)
-        oversInput.hint = "Overs (e.g. 12.4)"
+        val button = Button(this)
+        button.text = "RUN GDM ENGINE"
 
-        val wicketsInput = EditText(this)
-        wicketsInput.hint = "Wickets Lost (e.g. 4)"
-
-        val marketInput = EditText(this)
-        marketInput.hint = "Market Line (e.g. 185.5)"
-
-        val calculateButton = Button(this)
-        calculateButton.text = "ANALYZE"
+        layout.addView(button)
 
         val result = TextView(this)
-        result.text = "GDMIE Engine Ready"
-        result.textSize = 20f
-        result.setPadding(0, 30, 0, 0)
-        result.gravity = Gravity.CENTER
+        result.textSize = 18f
+        result.setPadding(0, 40, 0, 0)
 
-        calculateButton.setOnClickListener {
-            result.text = "INPUT RECEIVED\n\nGDMIE ANALYSIS READY"
-        }
-
-        layout.addView(title)
-        layout.addView(subtitle)
-        layout.addView(scoreInput)
-        layout.addView(oversInput)
-        layout.addView(wicketsInput)
-        layout.addView(marketInput)
-        layout.addView(calculateButton)
         layout.addView(result)
+
+        button.setOnClickListener {
+
+            val input = GDMInput(
+                presentValue = 50.0,
+                recentValue = 55.0,
+                expectedValue = 60.0,
+                marketValue = 52.0,
+                contextFactor = 50.0,
+                momentumFactor = 50.0,
+                riskFactor = 20.0
+            )
+
+            val output = GDMEngine.calculate(input)
+
+            result.text =
+                "Expected Value: ${output.expectedValue}\n" +
+                "Edge: ${output.edge}\n" +
+                "Confidence: ${output.confidence}\n" +
+                "Decision: ${output.decision}"
+        }
 
         setContentView(layout)
     }
