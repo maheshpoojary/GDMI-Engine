@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gdmie.app"
+    namespace = "com.gdmie"
     compileSdk = 35
 
     defaultConfig {
@@ -18,19 +18,6 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
     }
 }
