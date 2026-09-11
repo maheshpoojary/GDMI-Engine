@@ -10,7 +10,9 @@ class ReverseEdgeResultEngine {
         val calculated = calculator.calculate(input)
 
         val decision =
-            decisionEngine.decide(calculated.edgeScore)
+            decisionEngine.decide(
+                calculated.edgeScore
+            )
 
         val explanation =
             """
@@ -25,9 +27,9 @@ class ReverseEdgeResultEngine {
             Decision = $decision
             """.trimIndent()
 
-        return ReverseEdgeResult(
-            gap = calculated.gap,
-            edgeScore = calculated.edgeScore
+        return calculated.copy(
+            decision = decision,
+            explanation = explanation
         )
     }
 }
