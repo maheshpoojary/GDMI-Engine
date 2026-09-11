@@ -1,4 +1,4 @@
-name: Android Build
+name: GDMI Engine Build
 
 on:
   push:
@@ -11,23 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+      - name: Build GDMI Engine
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GDMI-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: GDMI-Engine-Debug
+          path: app/build/outputs/apk/debug/*.apk
