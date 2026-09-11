@@ -3,9 +3,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="GDMIE"
+        android:label="GDMI Engine"
         android:supportsRtl="true"
-        android:theme="@style/Theme.GDMIE">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
             android:name=".MainActivity"
