@@ -21,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mahesh.gdmi.engine.ReverseEdgeInput
+import com.mahesh.gdmi.engine.ReverseEdgeViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -36,27 +38,25 @@ class MainActivity : ComponentActivity() {
 @androidx.compose.runtime.Composable
 fun GDMIApp() {
 
-    var value1 by remember {
-        mutableStateOf("")
+    val viewModel = remember {
+        ReverseEdgeViewModel()
     }
 
-    var value2 by remember {
-        mutableStateOf("")
-    }
-
-    var value3 by remember {
-        mutableStateOf("")
-    }
+    var present by remember { mutableStateOf("") }
+    var expected by remember { mutableStateOf("") }
+    var target by remember { mutableStateOf("") }
+    var movement by remember { mutableStateOf("") }
+    var risk by remember { mutableStateOf("") }
+    var timing by remember { mutableStateOf("") }
 
     var result by remember {
-        mutableStateOf("Waiting for input...")
+        mutableStateOf("Waiting for analysis...")
     }
 
     MaterialTheme {
 
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            modifier = Modifier.fillMaxSize()
         ) {
 
             Column(
@@ -68,61 +68,73 @@ fun GDMIApp() {
             ) {
 
                 Text(
-                    text = "🧠 GDMIE",
-                    style = MaterialTheme.typography.headlineLarge
+                    text = "GENERAL DECISION & MATHEMATICAL INTELLIGENCE ENGINE",
+                    style = MaterialTheme.typography.headlineSmall
                 )
 
                 Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-
-                Text(
-                    text = "General Decision & Mathematical Intelligence Engine",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(
-                    modifier = Modifier.height(24.dp)
+                    modifier = Modifier.height(20.dp)
                 )
 
                 OutlinedTextField(
-                    value = value1,
-                    onValueChange = {
-                        value1 = it
-                    },
-                    label = {
-                        Text("Input 1")
-                    },
+                    value = present,
+                    onValueChange = { present = it },
+                    label = { Text("Present") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier = Modifier.height(10.dp)
                 )
 
                 OutlinedTextField(
-                    value = value2,
-                    onValueChange = {
-                        value2 = it
-                    },
-                    label = {
-                        Text("Input 2")
-                    },
+                    value = expected,
+                    onValueChange = { expected = it },
+                    label = { Text("Expected") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(
-                    modifier = Modifier.height(12.dp)
+                    modifier = Modifier.height(10.dp)
                 )
 
                 OutlinedTextField(
-                    value = value3,
-                    onValueChange = {
-                        value3 = it
-                    },
-                    label = {
-                        Text("Input 3")
-                    },
+                    value = target,
+                    onValueChange = { target = it },
+                    label = { Text("Target") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = movement,
+                    onValueChange = { movement = it },
+                    label = { Text("Movement") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = risk,
+                    onValueChange = { risk = it },
+                    label = { Text("Risk") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
+                )
+
+                OutlinedTextField(
+                    value = timing,
+                    onValueChange = { timing = it },
+                    label = { Text("Timing") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -133,47 +145,32 @@ fun GDMIApp() {
                 Button(
                     onClick = {
 
-                        val input = mutableMapOf<String, Double>()
+                        val input = ReverseEdgeInput(
+                            present = present.toDoubleOrNull() ?: 0.0,
+                            expected = expected.toDoubleOrNull() ?: 0.0,
+                            target = target.toDoubleOrNull() ?: 0.0,
+                            movement = movement.toDoubleOrNull() ?: 0.0,
+                            risk = risk.toDoubleOrNull() ?: 0.0,
+                            timing = timing.toDoubleOrNull() ?: 0.0
+                        )
 
-                        value1.toDoubleOrNull()?.let {
-                            input["input1"] = it
-                        }
+                        val output = viewModel.analyze(input)
 
-                        value2.toDoubleOrNull()?.let {
-                            input["input2"] = it
-                        }
-
-                        value3.toDoubleOrNull()?.let {
-                            input["input3"] = it
-                        }
-
-                        if (input.isEmpty()) {
-
-                            result = "NO DATA"
-
-                        } else {
-
-                            val gdmi = GDMIEngine()
-
-                            val output = gdmi.process(input)
-
-                            result =
-                                """
-                                SCORE: ${output.score}
-                                
-                                DECISION: ${output.decision}
-                                
-                                ${output.explanation}
-                                """.trimIndent()
-                        }
+                        result =
+                            """
+                            GAP: ${output.gap}
+                            
+                            EDGE SCORE: ${output.edgeScore}
+                            
+                            DECISION: ${output.decision}
+                            
+                            ${output.explanation}
+                            """.trimIndent()
                     },
 
                     modifier = Modifier.fillMaxWidth()
                 ) {
-
-                    Text(
-                        text = "ANALYZE"
-                    )
+                    Text("ANALYZE")
                 }
 
                 Spacer(
@@ -182,7 +179,7 @@ fun GDMIApp() {
 
                 Text(
                     text = "GDMI RESULT",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 Spacer(
