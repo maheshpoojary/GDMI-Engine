@@ -21,7 +21,12 @@ object ReverseEdgeEngine {
     fun analyze(state: MatchState): ReverseEdgeResult {
 
         val overs = state.balls / 6.0
-        val crr = if (overs > 0) state.score / overs else 0.0
+
+        val crr =
+            if (overs > 0)
+                state.score / overs
+            else
+                0.0
 
         val recentMomentum =
             state.recentOverRuns - crr
@@ -34,9 +39,17 @@ object ReverseEdgeEngine {
                 else -> 0.0
             }
 
+        val oddsSignal =
+            ((1.0 / state.overOdds) -
+             (1.0 / state.underOdds)) * 10.0
+
         val expectedOverRuns =
-            (crr + recentMomentum * 0.35 + wicketFactor * 0.5)
-                .coerceIn(2.0, 20.0)
+            (
+                crr +
+                recentMomentum * 0.35 +
+                wicketFactor * 0.5 +
+                oddsSignal * 0.25
+            ).coerceIn(2.0, 20.0)
 
         val edge =
             expectedOverRuns - state.marketLine
