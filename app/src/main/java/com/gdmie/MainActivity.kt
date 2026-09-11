@@ -3,6 +3,7 @@ package com.gdmie
 import android.app.Activity
 import android.os.Bundle
 import android.graphics.Color
+import android.text.InputType
 import android.view.Gravity
 import android.widget.*
 
@@ -30,37 +31,44 @@ class MainActivity : Activity() {
 
         val presentInput = EditText(this)
         presentInput.hint = "Present Value"
-        presentInput.inputType = 2
+        presentInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(presentInput)
 
         val recentInput = EditText(this)
         recentInput.hint = "Recent Value"
-        recentInput.inputType = 2
+        recentInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(recentInput)
 
         val expectedInput = EditText(this)
         expectedInput.hint = "Expected Value"
-        expectedInput.inputType = 2
+        expectedInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(expectedInput)
 
         val marketInput = EditText(this)
         marketInput.hint = "Market Value"
-        marketInput.inputType = 2
+        marketInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(marketInput)
 
         val contextInput = EditText(this)
         contextInput.hint = "Context Factor"
-        contextInput.inputType = 2
+        contextInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(contextInput)
 
         val momentumInput = EditText(this)
         momentumInput.hint = "Momentum Factor"
-        momentumInput.inputType = 2
+        momentumInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(momentumInput)
 
         val riskInput = EditText(this)
         riskInput.hint = "Risk Factor"
-        riskInput.inputType = 2
+        riskInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
         layout.addView(riskInput)
 
         val button = Button(this)
@@ -74,22 +82,43 @@ class MainActivity : Activity() {
 
         button.setOnClickListener {
 
+            val present = presentInput.text.toString().trim().toDoubleOrNull()
+            val recent = recentInput.text.toString().trim().toDoubleOrNull()
+            val expected = expectedInput.text.toString().trim().toDoubleOrNull()
+            val market = marketInput.text.toString().trim().toDoubleOrNull()
+            val context = contextInput.text.toString().trim().toDoubleOrNull()
+            val momentum = momentumInput.text.toString().trim().toDoubleOrNull()
+            val risk = riskInput.text.toString().trim().toDoubleOrNull()
+
+            if (
+                present == null ||
+                recent == null ||
+                expected == null ||
+                market == null ||
+                context == null ||
+                momentum == null ||
+                risk == null
+            ) {
+                result.text = "Please enter all values."
+                return@setOnClickListener
+            }
+
             val input = GDMInput(
-                presentValue = presentInput.text.toString().toDoubleOrNull() ?: 0.0,
-                recentValue = recentInput.text.toString().toDoubleOrNull() ?: 0.0,
-                expectedValue = expectedInput.text.toString().toDoubleOrNull() ?: 0.0,
-                marketValue = marketInput.text.toString().toDoubleOrNull() ?: 0.0,
-                contextFactor = contextInput.text.toString().toDoubleOrNull() ?: 0.0,
-                momentumFactor = momentumInput.text.toString().toDoubleOrNull() ?: 0.0,
-                riskFactor = riskInput.text.toString().toDoubleOrNull() ?: 0.0
+                presentValue = present,
+                recentValue = recent,
+                expectedValue = expected,
+                marketValue = market,
+                contextFactor = context,
+                momentumFactor = momentum,
+                riskFactor = risk
             )
 
             val output = GDMEngine.calculate(input)
 
             result.text =
-                "Expected Value: ${output.expectedValue}\n" +
-                "Edge: ${output.edge}\n" +
-                "Confidence: ${output.confidence}\n" +
+                "Expected Value: ${output.expectedValue}\n\n" +
+                "Edge: ${output.edge}\n\n" +
+                "Confidence: ${output.confidence}\n\n" +
                 "Decision: ${output.decision}"
         }
 
