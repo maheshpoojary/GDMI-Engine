@@ -2,7 +2,7 @@ package com.mahesh.gdmi.engine
 
 class ReverseEdgeViewModel {
 
-    fun analyze(input: GDMInput): GDMResult {
-        return GDMIEEngine.calculate(input)
+    fun analyze(input: Map<String, Double>): GDMIResult {
+        return GDMIEngine().process(input)
     }
 }
