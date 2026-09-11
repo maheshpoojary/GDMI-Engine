@@ -10,8 +10,10 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         val title = TextView(this)
-        title.text = "GDMIE"
-        title.textSize = 32f
+
+        title.text = "GDMIE\nGeneral Decision & Mathematical Intelligence Engine"
+        title.textSize = 24f
+        title.setPadding(40, 80, 40, 40)
 
         setContentView(title)
     }
