@@ -2,44 +2,46 @@
 
 General Decision & Mathematical Intelligence Engine.
 
+## APP
+
+GDMI-Engine is a general-purpose decision and mathematical intelligence application.
+
+The APP provides:
+
+- 🧠 GDMIE Core
+- 📊 Data Input
+- 🧮 Automatic Calculation
+- 📈 Edge Score
+- 🎯 Decision Output
+- 📜 Calculation History
+- 🔍 Explain why the engine reached the result
+
+## Core Architecture
+
+APP
+→ GDMIE Core
+→ Data Input
+→ Automatic Calculation
+→ Edge Score
+→ Decision Output
+→ Calculation History
+→ Explanation
+
+## Intelligence Engine
+
+GDMIE Core is designed to process structured inputs,
+perform mathematical analysis, calculate an edge score,
+produce a decision, and explain the reasoning behind the result.
+
 ## Reverse Edge Engine
 
-GDMI-Engine contains a Live Cricket Over/Under analysis engine based on
-the Reverse Edge methodology.
+Reverse Edge is one specialized analysis engine inside GDMI-Engine.
 
-### Inputs
+It is currently implemented for Live Cricket Over/Under analysis
+using the Reverse Edge methodology.
 
-- Current score
-- Balls completed
-- Wickets fallen
-- Recent over runs
-- Market line
-- Over odds
-- Under odds
+## Future Expansion
 
-### Core Analysis
-
-The engine combines:
-
-1. Current Run Rate (CRR)
-2. Recent momentum
-3. Wicket factor
-4. Expected Over Runs (EOR)
-5. Market line
-6. Market edge
-7. Over/Under odds
-
-### Decision
-
-The engine produces one of three decisions:
-
-- `OVER`
-- `UNDER`
-- `NO BET`
-
-### Reverse Edge Logic
-
-Expected Over Runs are compared against the bookmaker's market line.
-
-```text
-Edge = Expected Over Runs - Market Line
+The GDMI-Engine architecture is designed to support
+multiple decision and mathematical intelligence modules,
+not limited to cricket.
