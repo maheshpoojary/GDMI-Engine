@@ -20,7 +20,6 @@ class MainActivity : Activity() {
         title.textSize = 32f
         title.setTextColor(Color.BLACK)
         title.gravity = Gravity.CENTER
-
         layout.addView(title)
 
         val info = TextView(this)
@@ -29,27 +28,60 @@ class MainActivity : Activity() {
         info.gravity = Gravity.CENTER
         layout.addView(info)
 
+        val presentInput = EditText(this)
+        presentInput.hint = "Present Value"
+        presentInput.inputType = 2
+        layout.addView(presentInput)
+
+        val recentInput = EditText(this)
+        recentInput.hint = "Recent Value"
+        recentInput.inputType = 2
+        layout.addView(recentInput)
+
+        val expectedInput = EditText(this)
+        expectedInput.hint = "Expected Value"
+        expectedInput.inputType = 2
+        layout.addView(expectedInput)
+
+        val marketInput = EditText(this)
+        marketInput.hint = "Market Value"
+        marketInput.inputType = 2
+        layout.addView(marketInput)
+
+        val contextInput = EditText(this)
+        contextInput.hint = "Context Factor"
+        contextInput.inputType = 2
+        layout.addView(contextInput)
+
+        val momentumInput = EditText(this)
+        momentumInput.hint = "Momentum Factor"
+        momentumInput.inputType = 2
+        layout.addView(momentumInput)
+
+        val riskInput = EditText(this)
+        riskInput.hint = "Risk Factor"
+        riskInput.inputType = 2
+        layout.addView(riskInput)
+
         val button = Button(this)
         button.text = "RUN GDM ENGINE"
-
         layout.addView(button)
 
         val result = TextView(this)
         result.textSize = 18f
         result.setPadding(0, 40, 0, 0)
-
         layout.addView(result)
 
         button.setOnClickListener {
 
             val input = GDMInput(
-                presentValue = 50.0,
-                recentValue = 55.0,
-                expectedValue = 60.0,
-                marketValue = 52.0,
-                contextFactor = 50.0,
-                momentumFactor = 50.0,
-                riskFactor = 20.0
+                presentValue = presentInput.text.toString().toDoubleOrNull() ?: 0.0,
+                recentValue = recentInput.text.toString().toDoubleOrNull() ?: 0.0,
+                expectedValue = expectedInput.text.toString().toDoubleOrNull() ?: 0.0,
+                marketValue = marketInput.text.toString().toDoubleOrNull() ?: 0.0,
+                contextFactor = contextInput.text.toString().toDoubleOrNull() ?: 0.0,
+                momentumFactor = momentumInput.text.toString().toDoubleOrNull() ?: 0.0,
+                riskFactor = riskInput.text.toString().toDoubleOrNull() ?: 0.0
             )
 
             val output = GDMEngine.calculate(input)
