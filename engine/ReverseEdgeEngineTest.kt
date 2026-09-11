@@ -1,98 +1,100 @@
-package engine
+package com.mahesh.gdmi.engine
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ReverseEdgeEngineTest {
+class GDMIEEngineTest {
 
     @Test
-    fun strongMomentumShouldGiveOver() {
-        val state = MatchState(
-            score = 120,
-            balls = 60,
-            wickets = 2,
-            recentOverRuns = 15,
-            marketLine = 11.0,
-            overOdds = 1.90,
-            underOdds = 1.90
+    fun strongEdgeShouldBeDetected() {
+        val input = GDMInput(
+            present = 10.0,
+            expected = 15.0,
+            target = 20.0,
+            movement = 2.0,
+            risk = 1.0,
+            timing = 1.0
         )
 
-        val result = ReverseEdgeEngine.analyze(state)
+        val result = GDMIEEngine.calculate(input)
 
-        assertEquals(13.55, result.expectedOverRuns, 0.01)
-        assertEquals(2.55, result.edge, 0.01)
-        assertEquals("OVER", result.decision)
+        assertEquals(5.0, result.gap)
+        assertEquals(10.0, result.targetGap)
+        assertEquals(7.0, result.edgeScore)
+        assertEquals("STRONG EDGE", result.decision)
+        assertEquals(90, result.confidence)
     }
 
     @Test
-    fun weakMomentumShouldGiveUnder() {
-        val state = MatchState(
-            score = 80,
-            balls = 60,
-            wickets = 8,
-            recentOverRuns = 5,
-            marketLine = 8.0,
-            overOdds = 1.90,
-            underOdds = 1.90
+    fun normalEdgeShouldBeDetected() {
+        val input = GDMInput(
+            present = 10.0,
+            expected = 14.0,
+            target = 18.0,
+            movement = 1.0,
+            risk = 1.0,
+            timing = 0.0
         )
 
-        val result = ReverseEdgeEngine.analyze(state)
+        val result = GDMIEEngine.calculate(input)
 
-        assertEquals(5.95, result.expectedOverRuns, 0.01)
-        assertEquals(-2.05, result.edge, 0.01)
-        assertEquals("UNDER", result.decision)
+        assertEquals(4.0, result.edgeScore)
+        assertEquals("EDGE", result.decision)
+        assertEquals(75, result.confidence)
     }
 
     @Test
-    fun balancedStateShouldGiveNoBet() {
-        val state = MatchState(
-            score = 90,
-            balls = 60,
-            wickets = 4,
-            recentOverRuns = 9,
-            marketLine = 9.0,
-            overOdds = 1.90,
-            underOdds = 1.90
+    fun weakEdgeShouldBeDetected() {
+        val input = GDMInput(
+            present = 10.0,
+            expected = 12.0,
+            target = 15.0,
+            movement = 1.0,
+            risk = 1.0,
+            timing = 0.0
         )
 
-        val result = ReverseEdgeEngine.analyze(state)
+        val result = GDMIEEngine.calculate(input)
 
-        assertEquals(9.0, result.expectedOverRuns, 0.01)
-        assertEquals(0.0, result.edge, 0.01)
-        assertEquals("NO BET", result.decision)
+        assertEquals(2.0, result.edgeScore)
+        assertEquals("WEAK EDGE", result.decision)
+        assertEquals(60, result.confidence)
     }
 
     @Test
-    fun lowWicketsShouldIncreaseExpectedRuns() {
-        val state = MatchState(
-            score = 100,
-            balls = 60,
-            wickets = 2,
-            recentOverRuns = 10,
-            marketLine = 10.0,
-            overOdds = 1.90,
-            underOdds = 1.90
+    fun noEdgeShouldBeDetected() {
+        val input = GDMInput(
+            present = 10.0,
+            expected = 11.0,
+            target = 12.0,
+            movement = 0.5,
+            risk = 1.0,
+            timing = 0.0
         )
 
-        val result = ReverseEdgeEngine.analyze(state)
+        val result = GDMIEEngine.calculate(input)
 
-        assertEquals(10.5, result.expectedOverRuns, 0.01)
+        assertEquals(0.5, result.edgeScore)
+        assertEquals("NO EDGE", result.decision)
+        assertEquals(40, result.confidence)
     }
 
     @Test
-    fun manyWicketsShouldReduceExpectedRuns() {
-        val state = MatchState(
-            score = 100,
-            balls = 60,
-            wickets = 8,
-            recentOverRuns = 10,
-            marketLine = 10.0,
-            overOdds = 1.90,
-            underOdds = 1.90
+    fun negativeGapShouldUseAbsoluteValue() {
+        val input = GDMInput(
+            present = 15.0,
+            expected = 10.0,
+            target = 20.0,
+            movement = 0.0,
+            risk = 0.0,
+            timing = 0.0
         )
 
-        val result = ReverseEdgeEngine.analyze(state)
+        val result = GDMIEEngine.calculate(input)
 
-        assertEquals(9.0, result.expectedOverRuns, 0.01)
+        assertEquals(-5.0, result.gap)
+        assertEquals(5.0, result.edgeScore)
+        assertEquals("EDGE", result.decision)
+        assertEquals(75, result.confidence)
     }
 }
