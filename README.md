@@ -2,33 +2,68 @@
 
 ## General Decision & Mathematical Intelligence Engine
 
-GDMIE is an intelligent decision and mathematical analysis engine designed to process data, apply mathematical models, and generate structured decision insights.
+GDMIE is a decision-intelligence Android application designed to transform
+multiple inputs and conditions into structured mathematical analysis.
 
-## Project Goal
+### Core Concept
 
-Build a powerful Android application powered by the GDMIE Engine, with a clean and scalable architecture.
+Question / Data
+↓
+GDMIE Engine
+↓
+Expected Value
+↓
+Edge
+↓
+Risk
+↓
+Confidence
+↓
+Decision
+↓
+Why?
 
-## Core Direction
+### Current Features
 
-- Mathematical Intelligence
-- Decision Engine
-- Data Analysis
-- Rule-Based Intelligence
-- Future AI/ML Integration
-- Android Application Integration
+- Present Value
+- Recent Value
+- Expected Value
+- Market Value
+- Context Factor
+- Momentum Factor
+- Risk Factor
+- Mathematical Decision Engine
+- Offline-ready core architecture
+- Network-ready architecture
+- Android application
+- GitHub Actions automated builds
 
-## Architecture
+### Build Status
 
-GDMIE will be developed as a modular system so that the core intelligence engine can evolve independently from the Android user interface.
+- Android APK: ✅
+- Gradle 8.13: ✅
+- Java/Kotlin JVM 17: ✅
+- Debug Build: ✅
+- Release AAB: 🚧
 
-## Development Status
+### Vision
 
-🚧 Active Development
+GDMIE aims to become a general-purpose decision intelligence platform
+that helps users understand data, compare situations, evaluate risk,
+and make more structured decisions.
 
-## Repository
+### Future
 
-This repository contains the core GDMIE Engine and its development components.
+- Advanced GDMIE Engine
+- Interactive visual layers
+- Graphs and analytics
+- Network data integration
+- Historical analysis
+- Backtesting
+- Free version with ads
+- Premium version
+- Google Play Store release
 
 ---
 
-**GDMIE — General Decision & Mathematical Intelligence Engine**
+**GDMIE — Think Smarter. Decide Better.**
