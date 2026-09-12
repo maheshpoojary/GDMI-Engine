@@ -31,11 +31,11 @@ jobs:
       - name: Make Gradle Wrapper Executable
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Build Release AAB
+        run: ./gradlew bundleRelease
 
-      - name: Upload APK
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: GDMIE-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: GDMIE-release-aab
+          path: app/build/outputs/bundle/release/*.aab
