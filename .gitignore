@@ -10,3 +10,6 @@ local.properties
 *.apk
 *.aab
 captures/
+
+gradle-*-bin.zip
+gradle-[0-9]*/
