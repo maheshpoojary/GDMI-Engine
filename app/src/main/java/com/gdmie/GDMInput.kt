@@ -2,10 +2,14 @@ package com.gdmie
 
 data class GDMInput(
     val presentValue: Double,
-    val recentValue: Double,
     val expectedValue: Double,
-    val marketValue: Double,
-    val contextFactor: Double,
-    val momentumFactor: Double,
+    val targetValue: Double,
+    val recentMomentum: Double,
+    val immediateMomentum: Double,
+    val twoMinMarketAdvantage: Double,
+    val exactMarketLine: Double,
+    val odds: Double,
+    val oddsMovement: Double,
+    val timingFactor: Double,
     val riskFactor: Double
 )

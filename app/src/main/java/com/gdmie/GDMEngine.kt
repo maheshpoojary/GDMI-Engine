@@ -1,30 +1,46 @@
 package com.gdmie
 
+import kotlin.math.abs
+
 object GDMEngine {
 
     fun calculate(input: GDMInput): GDMResult {
 
-        val expected =
-            (input.presentValue * 0.30) +
-            (input.recentValue * 0.20) +
-            (input.expectedValue * 0.20) +
-            (input.marketValue * 0.10) +
-            (input.contextFactor * 0.10) +
-            (input.momentumFactor * 0.05) +
-            (input.riskFactor * 0.05)
+        // Core match estimate
+        val coreExpected =
+            (input.presentValue * 0.35) +
+            (input.expectedValue * 0.30) +
+            (input.targetValue * 0.15) +
+            (input.recentMomentum * 0.10) +
+            (input.immediateMomentum * 0.10)
 
-        val edge = expected - input.marketValue
+        // Market gap
+        val marketGap =
+            coreExpected - input.exactMarketLine
+
+        // Market / momentum adjustment
+        val marketAdjustment =
+            (input.twoMinMarketAdvantage * 0.50) +
+            (input.oddsMovement * 0.25) +
+            (input.timingFactor * 0.15) -
+            (input.riskFactor * 0.40)
+
+        val expected =
+            coreExpected + marketAdjustment
+
+        val edge =
+            expected - input.exactMarketLine
 
         val confidence = when {
-            kotlin.math.abs(edge) >= 20 -> 0.90
-            kotlin.math.abs(edge) >= 10 -> 0.75
-            kotlin.math.abs(edge) >= 5 -> 0.60
+            abs(edge) >= 20.0 -> 0.90
+            abs(edge) >= 10.0 -> 0.75
+            abs(edge) >= 5.0 -> 0.60
             else -> 0.50
         }
 
         val decision = when {
-            edge > 0 -> "POSITIVE"
-            edge < 0 -> "NEGATIVE"
+            edge >= 5.0 -> "OVER"
+            edge <= -5.0 -> "UNDER"
             else -> "NEUTRAL"
         }
 
