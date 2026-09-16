@@ -12,6 +12,10 @@ object GDMIEEngineGateway {
     private val repository = GDMIERepository()
 
     suspend fun calculate(input: GDMInput): GDMResult {
+        if (!NetworkConfig.NETWORK_ENABLED) {
+            return GDMEngine.calculate(input)
+        }
+
         return withContext(Dispatchers.IO) {
             try {
                 val request = GDMIERequest(

@@ -2,8 +2,9 @@ package com.gdmie.network
 
 object NetworkConfig {
 
-    // Temporary placeholder.
-    // Replace with the real GDMIE backend URL when backend is ready.
+    // Backend URL will be replaced when the GDMIE backend is ready.
     const val BASE_URL = "https://example.com/"
 
+    // Keep local GDMIE engine available during development/testing.
+    const val NETWORK_ENABLED = false
 }
