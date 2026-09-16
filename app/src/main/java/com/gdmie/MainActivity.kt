@@ -1,449 +1,592 @@
 package com.gdmie
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 
 class MainActivity : Activity() {
 
-    private val bg = Color.rgb(4, 14, 25)
-    private val card = Color.rgb(9, 29, 47)
-    private val card2 = Color.rgb(12, 37, 58)
-    private val blue = Color.rgb(55, 165, 255)
-    private val green = Color.rgb(30, 220, 145)
-    private val yellow = Color.rgb(255, 220, 60)
-    private val red = Color.rgb(255, 90, 105)
+    private val bg = Color.rgb(5, 9, 18)
+    private val card = Color.rgb(11, 18, 31)
+    private val card2 = Color.rgb(14, 23, 39)
+    private val blue = Color.rgb(45, 155, 255)
+    private val cyan = Color.rgb(0, 220, 255)
+    private val green = Color.rgb(55, 225, 135)
+
+    private var liveEdgeView: TextView? = null
+    private var liveMetricsView: TextView? = null
+
+    private var latestEdge = "—"
+    private var latestMomentum = "—"
+    private var latestRisk = "—"
+    private var latestConfidence = "—"
     private val white = Color.WHITE
-    private val muted = Color.rgb(155, 180, 200)
+    private val muted = Color.rgb(145, 165, 188)
+
+    private fun dp(v: Int): Int =
+        (v * resources.displayMetrics.density).toInt()
+
+    private fun text(
+        value: String,
+        size: Float,
+        color: Int,
+        bold: Boolean = false
+    ): TextView {
+        return TextView(this).apply {
+            text = value
+            textSize = size
+            setTextColor(color)
+            if (bold) setTypeface(null, Typeface.BOLD)
+        }
+    }
+
+    private fun panel(): LinearLayout {
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+            background = GradientDrawable().apply {
+                setColor(card)
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), Color.rgb(24, 52, 78))
+            }
+        }
+    }
+
+    private fun space(h: Int): View =
+        Space(this).apply {
+            layoutParams = LinearLayout.LayoutParams(1, dp(h))
+        }
+
+    private fun section(parent: LinearLayout, title: String) {
+        parent.addView(
+            text(title, 11f, cyan, true).apply {
+                letterSpacing = 0.10f
+            }
+        )
+        parent.addView(space(9))
+    }
+
+    private fun menuButton(
+        parent: LinearLayout,
+        title: String,
+        subtitle: String,
+        action: () -> Unit
+    ) {
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(14), dp(16), dp(14))
+
+            background = GradientDrawable().apply {
+                setColor(card2)
+                cornerRadius = dp(16).toFloat()
+                setStroke(dp(1), Color.rgb(25, 55, 82))
+            }
+
+            setOnClickListener { action() }
+        }
+
+        box.addView(text(title, 15f, white, true))
+
+        box.addView(
+            text(subtitle, 11f, muted).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        parent.addView(
+            box,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+    }
+
+    private fun statCard(
+        parent: LinearLayout,
+        title: String,
+        value: String,
+        subtitle: String
+    ) {
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(14), dp(14), dp(14), dp(14))
+            background = GradientDrawable().apply {
+                setColor(card2)
+                cornerRadius = dp(15).toFloat()
+                setStroke(dp(1), Color.rgb(25, 55, 82))
+            }
+        }
+
+        box.addView(text(title, 10f, muted, true))
+
+        box.addView(
+            text(value, 23f, cyan, true).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        box.addView(
+            text(subtitle, 10f, muted).apply {
+                setPadding(0, dp(3), 0, 0)
+            }
+        )
+
+        parent.addView(
+            box,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val scroll = ScrollView(this)
-        scroll.setBackgroundColor(bg)
+        window.statusBarColor = bg
+        window.navigationBarColor = bg
 
-        val root = LinearLayout(this)
-        root.orientation = LinearLayout.VERTICAL
-        root.setPadding(dp(18), dp(20), dp(18), dp(30))
-        scroll.addView(root)
-
-        // TOP BAR
-        val top = LinearLayout(this)
-        top.orientation = LinearLayout.HORIZONTAL
-        top.gravity = Gravity.CENTER_VERTICAL
-
-        val back = TextView(this)
-        back.text = "‹"
-        back.textSize = 38f
-        back.setTextColor(white)
-        back.gravity = Gravity.CENTER
-
-        top.addView(back, LinearLayout.LayoutParams(dp(45), dp(55)))
-
-        val titleBox = LinearLayout(this)
-        titleBox.orientation = LinearLayout.VERTICAL
-
-        addText(titleBox, "NIFTY", 21f, white, true)
-        addText(titleBox, "NSE", 10f, blue, true)
-
-        top.addView(
-            titleBox,
-            LinearLayout.LayoutParams(0, dp(55), 1f)
-        )
-
-        val star = TextView(this)
-        star.text = "★"
-        star.textSize = 27f
-        star.setTextColor(yellow)
-        star.gravity = Gravity.CENTER
-
-        top.addView(star, LinearLayout.LayoutParams(dp(50), dp(55)))
-
-        root.addView(top)
-
-        // PRICE
-        addText(root, "24,198.30", 30f, white, true)
-        addText(root, "+178.45  (+0.74%)", 14f, green, true)
-
-        space(root, 15)
-
-        // TIME PERIODS
-        val periods = LinearLayout(this)
-        periods.orientation = LinearLayout.HORIZONTAL
-        periods.gravity = Gravity.CENTER
-
-        val values = arrayOf("1D", "1W", "1M", "3M", "1Y", "ALL")
-
-        for (i in values.indices) {
-            val p = TextView(this)
-            p.text = values[i]
-            p.textSize = 12f
-            p.gravity = Gravity.CENTER
-            p.setTextColor(if (i == 0) white else muted)
-
-            if (i == 0) {
-                p.background = rounded(blue, 18)
-            }
-
-            periods.addView(
-                p,
-                LinearLayout.LayoutParams(0, dp(38), 1f).apply {
-                    setMargins(dp(3), 0, dp(3), 0)
-                }
-            )
+        val scroll = ScrollView(this).apply {
+            setBackgroundColor(bg)
+            isFillViewport = true
         }
 
-        root.addView(periods)
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(20), dp(18), dp(30))
+        }
 
-        space(root, 18)
-
-        // SIMPLE CHART
-        val chart = TextView(this)
-        chart.text = """
-            ╱╲       ╱╲
-        ╱╲╱  ╲╱╲ ╱  ╲
-       ╱          ╲   ╲╱╲
-      ╱              ╲     ╲
-    ╱                  ╲╱╲
-        """.trimIndent()
-        chart.textSize = 22f
-        chart.setTextColor(green)
-        chart.gravity = Gravity.CENTER
-        chart.setPadding(dp(5), dp(5), dp(5), dp(5))
-        chart.background = rounded(card, 20)
+        // ---------------------------------------------------------
+        // HEADER
+        // ---------------------------------------------------------
 
         root.addView(
-            chart,
+            text("GDMIE", 32f, cyan, true)
+        )
+
+        root.addView(
+            text(
+                "GENERAL DECISION & MATHEMATICAL INTELLIGENCE ENGINE",
+                9f,
+                Color.rgb(95, 120, 145)
+            ).apply {
+                setPadding(0, dp(3), 0, 0)
+            }
+        )
+
+        root.addView(space(24))
+
+        // ---------------------------------------------------------
+        // GREETING
+        // ---------------------------------------------------------
+
+        val hour = java.util.Calendar.getInstance()
+            .get(java.util.Calendar.HOUR_OF_DAY)
+
+        val greeting = when {
+            hour < 12 -> "Good Morning"
+            hour < 17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+
+        root.addView(
+            text(greeting, 25f, white, true)
+        )
+
+        root.addView(
+            text(
+                "Decision intelligence at a glance.",
+                13f,
+                muted
+            ).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        root.addView(space(18))
+
+        // ---------------------------------------------------------
+        // ENGINE STATUS
+        // ---------------------------------------------------------
+
+        val status = panel()
+
+        status.addView(
+            text("●  ENGINE READY", 12f, green, true)
+        )
+
+        status.addView(
+            text(
+                "Decision Intelligence System",
+                18f,
+                white,
+                true
+            ).apply {
+                setPadding(0, dp(7), 0, 0)
+            }
+        )
+
+        status.addView(
+            text(
+                "General-purpose analysis engine is ready.",
+                11f,
+                muted
+            ).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        root.addView(
+            status,
             LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(155)
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
             )
         )
 
-        space(root, 20)
+        root.addView(space(16))
 
-        // GDMIE ANALYSIS HEADER
-        val analysisTitle = LinearLayout(this)
-        analysisTitle.orientation = LinearLayout.HORIZONTAL
+        // ---------------------------------------------------------
+        // PRIMARY ACTION
+        // ---------------------------------------------------------
 
-        addText(analysisTitle, "GDMIE ANALYSIS", 17f, white, true)
+        val runButton = Button(this).apply {
+            text = "RUN GDM ENGINE"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setTypeface(null, Typeface.BOLD)
 
-        val updated = TextView(this)
-        updated.text = "Last updated 5 min ago"
-        updated.textSize = 10f
-        updated.setTextColor(muted)
-        updated.gravity = Gravity.CENTER_VERTICAL or Gravity.RIGHT
+            background = GradientDrawable().apply {
+                setColor(blue)
+                cornerRadius = dp(16).toFloat()
+            }
 
-        analysisTitle.addView(
-            updated,
-            LinearLayout.LayoutParams(0, dp(30), 1f)
+            setOnClickListener {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        DataInputActivity::class.java
+                    )
+                )
+            }
+        }
+
+        root.addView(
+            runButton,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(58)
+            )
         )
 
-        root.addView(analysisTitle)
+        root.addView(space(22))
 
-        space(root, 10)
+        // ---------------------------------------------------------
+        // LIVE OVERVIEW
+        // ---------------------------------------------------------
 
-        // MAIN ANALYSIS CARD
-        val analysis = LinearLayout(this)
-        analysis.orientation = LinearLayout.VERTICAL
-        analysis.setPadding(dp(17), dp(17), dp(17), dp(17))
-        analysis.background = rounded(card, 22)
+        section(root, "LIVE OVERVIEW")
 
-        val mainRow = LinearLayout(this)
-        mainRow.orientation = LinearLayout.HORIZONTAL
-        mainRow.gravity = Gravity.CENTER_VERTICAL
+        val overview = panel()
 
-        // CONFIDENCE
-        val confidenceBox = LinearLayout(this)
-        confidenceBox.orientation = LinearLayout.VERTICAL
-        confidenceBox.gravity = Gravity.CENTER
-        confidenceBox.background = rounded(card2, 60)
-
-        addText(
-            confidenceBox,
-            "72%",
-            29f,
-            green,
-            true,
-            Gravity.CENTER
+        overview.addView(
+            text("LATEST ANALYSIS", 11f, cyan, true)
         )
 
-        addText(
-            confidenceBox,
-            "CONFIDENCE",
-            9f,
+        liveEdgeView = text("—", 38f, cyan, true).apply {
+            setPadding(0, dp(5), 0, 0)
+        }
+        overview.addView(liveEdgeView)
+
+        overview.addView(
+            text("REVERSE EDGE", 11f, muted, true).apply {
+                setPadding(0, dp(2), 0, 0)
+            }
+        )
+
+        liveMetricsView = text(
+            "Momentum: —    Risk: —    Confidence: —",
+            11f,
             muted,
-            true,
-            Gravity.CENTER
-        )
-
-        mainRow.addView(
-            confidenceBox,
-            LinearLayout.LayoutParams(dp(125), dp(125))
-        )
-
-        spaceHorizontal(mainRow, 15)
-
-        val resultBox = LinearLayout(this)
-        resultBox.orientation = LinearLayout.VERTICAL
-
-        addText(resultBox, "POSITIVE EDGE", 18f, green, true)
-        addText(resultBox, "Expected Range", 11f, muted, false)
-        addText(resultBox, "24,320 – 24,480", 17f, white, true)
-        addText(resultBox, "Current Price", 11f, muted, false)
-        addText(resultBox, "24,198.30", 15f, blue, true)
-
-        mainRow.addView(
-            resultBox,
-            LinearLayout.LayoutParams(0, dp(125), 1f)
-        )
-
-        analysis.addView(mainRow)
-
-        space(analysis, 18)
-
-        // QUICK FACTORS
-        addText(analysis, "QUICK FACTORS", 12f, muted, true)
-
-        space(analysis, 8)
-
-        val factors = LinearLayout(this)
-        factors.orientation = LinearLayout.HORIZONTAL
-
-        factors.addView(
-            factor("Trend", "+8", green),
-            factorParams()
-        )
-        factors.addView(
-            factor("Momentum", "+6", green),
-            factorParams()
-        )
-        factors.addView(
-            factor("Volume", "+4", green),
-            factorParams()
-        )
-        factors.addView(
-            factor("Volatility", "-3", red),
-            factorParams()
-        )
-
-        analysis.addView(factors)
-
-        space(analysis, 18)
-
-        val button = Button(this)
-        button.text = "VIEW FULL ANALYSIS   →"
-        button.textSize = 14f
-        button.setTextColor(white)
-        button.typeface = Typeface.DEFAULT_BOLD
-        button.background = rounded(blue, 28)
-
-        analysis.addView(
-            button,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(52)
-            )
-        )
-
-        root.addView(analysis)
-
-        space(root, 20)
-
-        // DECISION
-        val decision = LinearLayout(this)
-        decision.orientation = LinearLayout.VERTICAL
-        decision.setPadding(dp(16), dp(14), dp(16), dp(14))
-        decision.background = rounded(card, 18)
-
-        addText(decision, "DECISION", 12f, blue, true)
-        addText(
-            decision,
-            "Positive edge, but be cautious near resistance.",
-            15f,
-            white,
             true
-        )
-        addText(
-            decision,
-            "Wait for confirmation if unsure.",
-            12f,
-            muted,
-            false
-        )
+        ).apply {
+            setPadding(0, dp(10), 0, 0)
+        }
+        overview.addView(liveMetricsView)
 
-        root.addView(decision)
-
-        space(root, 20)
-
-        // WHAT WOULD CHANGE IT
-        addText(root, "WHAT WOULD CHANGE IT?", 14f, white, true)
-        space(root, 8)
-
-        addChange(root, "●", "Break above 24,350", "Increases confidence", green)
-        addChange(root, "●", "Drop below 24,050", "Turns neutral / negative", red)
-        addChange(root, "●", "Higher volume confirmation", "Strengthens the setup", green)
-
-        space(root, 15)
-
-        // BOTTOM NAV
-        val nav = LinearLayout(this)
-        nav.orientation = LinearLayout.HORIZONTAL
-        nav.gravity = Gravity.CENTER
-        nav.setPadding(0, dp(8), 0, 0)
-
-        val navItems = arrayOf(
-            "⌂\nHome",
-            "⌁\nMarkets",
-            "✦\nAsk GDMIE",
-            "◉\nInsights",
-            "●\nProfile"
+        overview.addView(
+            text(
+                "Latest GDMIE calculation • updates automatically",
+                10f,
+                Color.rgb(95, 120, 145)
+            ).apply {
+                setPadding(0, dp(7), 0, 0)
+            }
         )
 
-        for (i in navItems.indices) {
-            val item = TextView(this)
-            item.text = navItems[i]
-            item.textSize = 10f
-            item.gravity = Gravity.CENTER
-            item.setTextColor(if (i == 1) blue else muted)
+        overview.addView(space(12))
 
-            nav.addView(
-                item,
-                LinearLayout.LayoutParams(0, dp(58), 1f)
+        overview.addView(
+            text(
+                "ENGINE SIGNALS",
+                10f,
+                cyan,
+                true
+            )
+        )
+
+        overview.addView(
+            text(
+                "PRESENT → EXPECTED → MARKET → GAP → MOVEMENT",
+                9f,
+                Color.rgb(80, 110, 140),
+                true
+            ).apply {
+                setPadding(0, dp(7), 0, 0)
+            }
+        )
+
+        root.addView(
+            overview,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        root.addView(space(10))
+
+        val stats = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        statCard(stats, "PRESENT", "—", "Current value")
+        stats.addView(Space(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(8), 1)
+        })
+        statCard(stats, "EXPECTED", "—", "Expected value")
+        stats.addView(Space(this).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(8), 1)
+        })
+        statCard(stats, "RISK", "—", "Risk factor")
+
+        root.addView(stats)
+
+        root.addView(space(22))
+
+        // ---------------------------------------------------------
+        // INTELLIGENCE
+        // ---------------------------------------------------------
+
+        section(root, "INTELLIGENCE")
+
+        menuButton(
+            root,
+            "MARKET ANALYSIS",
+            "Analyze present, expected, market and edge values"
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DataInputActivity::class.java
+                )
             )
         }
 
-        root.addView(nav)
+        root.addView(space(9))
 
+        menuButton(
+            root,
+            "COMPARE",
+            "Compare two decision profiles side-by-side"
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    CompareActivity::class.java
+                )
+            )
+        }
+
+        root.addView(space(9))
+
+        menuButton(
+            root,
+            "DECISION HISTORY",
+            "View previous GDMIE engine analyses"
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DecisionHistoryActivity::class.java
+                )
+            )
+        }
+
+        root.addView(space(9))
+
+        menuButton(
+            root,
+            "ASK GDMIE",
+            "Ask the intelligence engine for structured reasoning"
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    AskGDMIEActivity::class.java
+                )
+            )
+        }
+
+        root.addView(space(9))
+
+        menuButton(
+            root,
+            "WHY & DETAILS",
+            "Understand the factors behind every engine result"
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    WhyDetailsActivity::class.java
+                )
+            )
+        }
+
+        root.addView(space(22))
+
+        // ---------------------------------------------------------
+        // ENGINE FLOW
+        // ---------------------------------------------------------
+
+        val flow = panel()
+
+        flow.addView(
+            text("ENGINE FLOW", 11f, cyan, true)
+        )
+
+        flow.addView(
+            text(
+                "PRESENT  →  EXPECTED  →  TARGET\n" +
+                "CONTEXT  →  MOMENTUM  →  GAP\n" +
+                "MOVEMENT →  RISK  →  TIMING\n" +
+                "REVERSE EDGE  →  DECISION",
+                11f,
+                muted
+            ).apply {
+                setPadding(0, dp(12), 0, 0)
+                setLineSpacing(dp(3).toFloat(), 1f)
+            }
+        )
+
+        root.addView(
+            flow,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        root.addView(space(22))
+
+        // ---------------------------------------------------------
+        // UPCOMING MODULES
+        // ---------------------------------------------------------
+
+        section(root, "GDMIE ECOSYSTEM")
+
+        val ecosystem = panel()
+
+        val strategyButton = TextView(this).apply {
+            text = "STRATEGY & BACKTEST"
+            textSize = 13f
+            setTextColor(white)
+            setTypeface(null, Typeface.BOLD)
+            setPadding(0, 0, 0, 0)
+            setOnClickListener {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        StrategyBacktestActivity::class.java
+                    )
+                )
+            }
+        }
+
+        ecosystem.addView(strategyButton)
+
+        ecosystem.addView(
+            text(
+                "WATCHLIST  •  ALERTS  •  TOOLS  •  MULTI-ASSET",
+                10f,
+                muted
+            ).apply {
+                setPadding(0, dp(7), 0, 0)
+            }
+        )
+
+        ecosystem.addView(
+            text(
+                "LIFE DECISIONS  •  PROFILE & INSIGHTS",
+                10f,
+                muted
+            ).apply {
+                setPadding(0, dp(4), 0, 0)
+            }
+        )
+
+        root.addView(
+            ecosystem,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+
+        root.addView(space(20))
+
+        root.addView(
+            text(
+                "GDMIE • GENERAL DECISION INTELLIGENCE",
+                9f,
+                Color.rgb(70, 95, 120)
+            ).apply {
+                gravity = Gravity.CENTER
+            }
+        )
+
+        scroll.addView(root)
         setContentView(scroll)
+        updateHomeOverview()
     }
 
-    private fun factor(
-        name: String,
-        value: String,
-        color: Int
-    ): LinearLayout {
-        val box = LinearLayout(this)
-        box.orientation = LinearLayout.VERTICAL
-        box.gravity = Gravity.CENTER
-        box.setPadding(dp(3), dp(8), dp(3), dp(8))
-        box.background = rounded(card2, 13)
 
-        addText(box, name, 9f, muted, false, Gravity.CENTER)
-        addText(box, value, 17f, color, true, Gravity.CENTER)
+    private fun updateHomeOverview() {
+        val prefs = getSharedPreferences("GDMIE_HOME", MODE_PRIVATE)
 
-        return box
+        val edge = prefs.getString("edge", "—") ?: "—"
+        val momentum = prefs.getString("momentum", "—") ?: "—"
+        val risk = prefs.getString("risk", "—") ?: "—"
+        val confidence = prefs.getString("confidence", "—") ?: "—"
+
+        liveEdgeView?.text = edge
+        liveMetricsView?.text =
+            "Momentum: $momentum    Risk: $risk    Confidence: $confidence"
     }
 
-    private fun factorParams(): LinearLayout.LayoutParams {
-        return LinearLayout.LayoutParams(0, dp(70), 1f).apply {
-            setMargins(dp(3), 0, dp(3), 0)
-        }
+    override fun onResume() {
+        super.onResume()
+        updateHomeOverview()
     }
 
-    private fun addChange(
-        parent: LinearLayout,
-        icon: String,
-        title: String,
-        subtitle: String,
-        color: Int
-    ) {
-        val row = LinearLayout(this)
-        row.orientation = LinearLayout.HORIZONTAL
-        row.gravity = Gravity.CENTER_VERTICAL
-        row.setPadding(dp(12), dp(10), dp(12), dp(10))
-        row.background = rounded(card, 14)
-
-        val dot = TextView(this)
-        dot.text = icon
-        dot.textSize = 15f
-        dot.setTextColor(color)
-        dot.gravity = Gravity.CENTER
-
-        row.addView(dot, LinearLayout.LayoutParams(dp(35), dp(55)))
-
-        val texts = LinearLayout(this)
-        texts.orientation = LinearLayout.VERTICAL
-
-        addText(texts, title, 13f, white, true)
-        addText(texts, subtitle, 11f, muted, false)
-
-        row.addView(
-            texts,
-            LinearLayout.LayoutParams(0, dp(55), 1f)
-        )
-
-        parent.addView(
-            row,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(75)
-            ).apply {
-                bottomMargin = dp(7)
-            }
-        )
-    }
-
-    private fun addText(
-        parent: LinearLayout,
-        text: String,
-        size: Float,
-        color: Int,
-        bold: Boolean,
-        gravity: Int = Gravity.START
-    ) {
-        val tv = TextView(this)
-        tv.text = text
-        tv.textSize = size
-        tv.setTextColor(color)
-        tv.gravity = gravity
-
-        if (bold) {
-            tv.setTypeface(null, Typeface.BOLD)
-        }
-
-        parent.addView(
-            tv,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = dp(4)
-            }
-        )
-    }
-
-    private fun space(parent: LinearLayout, height: Int) {
-        val s = Space(this)
-        parent.addView(
-            s,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(height)
-            )
-        )
-    }
-
-    private fun spaceHorizontal(parent: LinearLayout, width: Int) {
-        val s = Space(this)
-        parent.addView(
-            s,
-            LinearLayout.LayoutParams(dp(width), dp(1))
-        )
-    }
-
-    private fun rounded(color: Int, radius: Int): GradientDrawable {
-        return GradientDrawable().apply {
-            setColor(color)
-            cornerRadius = dp(radius).toFloat()
-        }
-    }
-
-    private fun dp(value: Int): Int {
-        return (value * resources.displayMetrics.density).toInt()
-    }
 }

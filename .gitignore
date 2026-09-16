@@ -13,3 +13,7 @@ captures/
 
 gradle-*-bin.zip
 gradle-[0-9]*/
+
+# Signing keys
+*.jks
+*.keystore

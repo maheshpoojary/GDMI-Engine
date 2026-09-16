@@ -9,21 +9,37 @@
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true">
 
             <intent-filter>
-
-                <action
-                    android:name="android.intent.action.MAIN" />
-
-                <category
-                    android:name="android.intent.category.LAUNCHER" />
-
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
 
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DataInputActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CompareActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DecisionOutputActivity"
+            android:exported="false" />
+
+        <activity android:name=".AskGDMIEActivity" />
+            <activity android:name=".DecisionHistoryActivity" />
+        <activity android:name=".WhyDetailsActivity" android:exported="false" />
+        <activity android:name=".StrategyBacktestActivity" android:exported="false" />
+        <activity android:name=".BacktestHistoryActivity" android:exported="false" />
     </application>
 
 </manifest>
