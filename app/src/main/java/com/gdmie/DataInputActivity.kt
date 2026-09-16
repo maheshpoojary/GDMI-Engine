@@ -7,6 +7,10 @@ import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.*
+import com.gdmie.network.GDMIEEngineGateway
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class DataInputActivity : Activity() {
@@ -194,44 +198,39 @@ class DataInputActivity : Activity() {
             riskFactor = v("riskFactor")
         )
 
-        val result = GDMEngine.calculate(input)
+        CoroutineScope(Dispatchers.IO).launch {
 
-        getSharedPreferences("GDMIE_HOME", MODE_PRIVATE)
-            .edit()
-            .putString("edge", "%.2f".format(result.edge))
-            .putString("momentum", "%.2f".format(result.momentum))
-            .putString("risk", "%.2f".format(result.risk))
-            .putString("confidence", "%.0f%%".format(result.confidence * 100))
-            .apply()
+            val result = GDMIEEngineGateway.calculate(input)
 
-        val intent = android.content.Intent(
-            this,
-            DecisionOutputActivity::class.java
-        )
+            runOnUiThread {
 
-        intent.putExtra("presentValue", result.presentValue)
-        intent.putExtra("expectedValue", result.expectedValue)
-        intent.putExtra("marketValue", result.marketValue)
-        intent.putExtra("gap", result.gap)
-        intent.putExtra("momentum", result.momentum)
-        intent.putExtra("risk", result.risk)
-        intent.putExtra("edge", result.edge)
-        intent.putExtra("confidence", result.confidence)
-        intent.putExtra("decision", result.decision)
-        intent.putExtra("explanation", result.explanation)
+                getSharedPreferences("GDMIE_HOME", MODE_PRIVATE)
+                    .edit()
+                    .putString("edge", "%.2f".format(result.edge))
+                    .putString("momentum", "%.2f".format(result.momentum))
+                    .putString("risk", "%.2f".format(result.risk))
+                    .putString("confidence", "%.0f%%".format(result.confidence * 100))
+                    .apply()
 
-        // ---------------------------------------------------------
-        // SAVE LATEST RESULT FOR HOME DASHBOARD
-        // ---------------------------------------------------------
-        getSharedPreferences("GDMIE_HOME", MODE_PRIVATE)
-            .edit()
-            .putString("edge", "%.2f".format(result.edge))
-            .putString("momentum", "%.2f".format(result.momentum))
-            .putString("risk", "%.2f".format(result.risk))
-            .putString("confidence", "%.0f%%".format(result.confidence * 100))
-            .apply()
+                val intent = android.content.Intent(
+                    this@DataInputActivity,
+                    DecisionOutputActivity::class.java
+                )
 
-        startActivity(intent)
+                intent.putExtra("presentValue", result.presentValue)
+                intent.putExtra("expectedValue", result.expectedValue)
+                intent.putExtra("marketValue", result.marketValue)
+                intent.putExtra("gap", result.gap)
+                intent.putExtra("momentum", result.momentum)
+                intent.putExtra("risk", result.risk)
+                intent.putExtra("edge", result.edge)
+                intent.putExtra("confidence", result.confidence)
+                intent.putExtra("decision", result.decision)
+                intent.putExtra("explanation", result.explanation)
+
+                startActivity(intent)
+            }
+        }
     }
 
     private fun rounded(color: Int, radius: Int): GradientDrawable {
