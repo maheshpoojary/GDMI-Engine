@@ -13,27 +13,39 @@ import android.widget.*
 
 class MainActivity : Activity() {
 
-    private val bg = Color.rgb(5, 9, 18)
-    private val card = Color.rgb(11, 18, 31)
-    private val card2 = Color.rgb(14, 23, 39)
-    private val blue = Color.rgb(45, 155, 255)
-    private val cyan = Color.rgb(0, 220, 255)
-    private val green = Color.rgb(55, 225, 135)
+    // ============================================================
+    // GDMIE HOME V2
+    // Premium dark / blue decision-intelligence dashboard
+    // ============================================================
 
-    private var liveEdgeView: TextView? = null
-    private var liveMetricsView: TextView? = null
+    private val bg = Color.rgb(4, 8, 17)
+    private val surface = Color.rgb(9, 16, 29)
+    private val surface2 = Color.rgb(13, 23, 40)
+    private val surface3 = Color.rgb(17, 30, 51)
 
-    private var latestEdge = "—"
-    private var latestMomentum = "—"
-    private var latestRisk = "—"
-    private var latestConfidence = "—"
+    private val cyan = Color.rgb(35, 205, 255)
+    private val blue = Color.rgb(45, 145, 255)
+    private val green = Color.rgb(45, 225, 135)
+    private val yellow = Color.rgb(255, 220, 70)
+
     private val white = Color.WHITE
     private val muted = Color.rgb(145, 165, 188)
+    private val dim = Color.rgb(82, 108, 135)
+    private val border = Color.rgb(25, 57, 87)
+
+    private var edgeView: TextView? = null
+    private var momentumView: TextView? = null
+    private var riskView: TextView? = null
+    private var confidenceView: TextView? = null
 
     private fun dp(v: Int): Int =
         (v * resources.displayMetrics.density).toInt()
 
-    private fun text(
+    // ------------------------------------------------------------
+    // TEXT
+    // ------------------------------------------------------------
+
+    private fun tv(
         value: String,
         size: Float,
         color: Int,
@@ -43,99 +55,141 @@ class MainActivity : Activity() {
             text = value
             textSize = size
             setTextColor(color)
-            if (bold) setTypeface(null, Typeface.BOLD)
+            if (bold) {
+                setTypeface(null, Typeface.BOLD)
+            }
         }
     }
 
-    private fun panel(): LinearLayout {
+    // ------------------------------------------------------------
+    // BACKGROUND
+    // ------------------------------------------------------------
+
+    private fun rounded(
+        color: Int,
+        radius: Int = 18,
+        strokeColor: Int = border,
+        strokeWidth: Int = 1
+    ): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = dp(radius).toFloat()
+            if (strokeWidth > 0) {
+                setStroke(dp(strokeWidth), strokeColor)
+            }
+        }
+    }
+
+    private fun card(): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(16), dp(18), dp(16))
-            background = GradientDrawable().apply {
-                setColor(card)
-                cornerRadius = dp(18).toFloat()
-                setStroke(dp(1), Color.rgb(24, 52, 78))
-            }
+            setPadding(dp(16), dp(15), dp(16), dp(15))
+            background = rounded(surface)
         }
     }
 
-    private fun space(h: Int): View =
-        Space(this).apply {
-            layoutParams = LinearLayout.LayoutParams(1, dp(h))
-        }
-
-    private fun section(parent: LinearLayout, title: String) {
-        parent.addView(
-            text(title, 11f, cyan, true).apply {
-                letterSpacing = 0.10f
-            }
-        )
-        parent.addView(space(9))
-    }
-
-    private fun menuButton(
-        parent: LinearLayout,
-        title: String,
-        subtitle: String,
-        action: () -> Unit
-    ) {
-        val box = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(16), dp(14), dp(16), dp(14))
-
-            background = GradientDrawable().apply {
-                setColor(card2)
-                cornerRadius = dp(16).toFloat()
-                setStroke(dp(1), Color.rgb(25, 55, 82))
-            }
-
-            setOnClickListener { action() }
-        }
-
-        box.addView(text(title, 15f, white, true))
-
-        box.addView(
-            text(subtitle, 11f, muted).apply {
-                setPadding(0, dp(5), 0, 0)
-            }
-        )
-
-        parent.addView(
-            box,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+    private fun gap(height: Int): View {
+        return Space(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                1,
+                dp(height)
             )
+        }
+    }
+
+    // ------------------------------------------------------------
+    // SECTION TITLE
+    // ------------------------------------------------------------
+
+    private fun sectionTitle(parent: LinearLayout, title: String) {
+
+        parent.addView(
+            tv(
+                title,
+                11f,
+                cyan,
+                true
+            ).apply {
+                letterSpacing = 0.12f
+            }
+        )
+
+        parent.addView(gap(9))
+    }
+
+    // ------------------------------------------------------------
+    // CATEGORY CHIP
+    // ------------------------------------------------------------
+
+    private fun chip(
+        parent: LinearLayout,
+        title: String,
+        selected: Boolean
+    ) {
+
+        val item = TextView(this).apply {
+
+            text = title
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setPadding(
+                dp(15),
+                dp(8),
+                dp(15),
+                dp(8)
+            )
+
+            setTextColor(
+                if (selected) Color.WHITE else muted
+            )
+
+            background = rounded(
+                if (selected) blue else surface2,
+                18,
+                if (selected) blue else border
+            )
+        }
+
+        parent.addView(
+            item,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                dp(36)
+            ).apply {
+                marginEnd = dp(7)
+            }
         )
     }
 
-    private fun statCard(
+    // ------------------------------------------------------------
+    // MARKET CARD
+    // ------------------------------------------------------------
+
+    private fun marketCard(
         parent: LinearLayout,
-        title: String,
+        name: String,
         value: String,
-        subtitle: String
+        change: String
     ) {
+
         val box = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), dp(14), dp(14), dp(14))
-            background = GradientDrawable().apply {
-                setColor(card2)
-                cornerRadius = dp(15).toFloat()
-                setStroke(dp(1), Color.rgb(25, 55, 82))
-            }
+            setPadding(dp(14), dp(13), dp(14), dp(13))
+            background = rounded(surface2)
         }
 
-        box.addView(text(title, 10f, muted, true))
+        box.addView(
+            tv(name, 11f, muted, true)
+        )
 
         box.addView(
-            text(value, 23f, cyan, true).apply {
+            tv(value, 20f, white, true).apply {
                 setPadding(0, dp(5), 0, 0)
             }
         )
 
         box.addView(
-            text(subtitle, 10f, muted).apply {
+            tv(change, 10f, green, true).apply {
                 setPadding(0, dp(3), 0, 0)
             }
         )
@@ -144,13 +198,130 @@ class MainActivity : Activity() {
             box,
             LinearLayout.LayoutParams(
                 0,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                dp(94),
                 1f
             )
         )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    // ------------------------------------------------------------
+    // FEATURE BUTTON
+    // ------------------------------------------------------------
+
+    private fun featureButton(
+        parent: LinearLayout,
+        title: String,
+        subtitle: String,
+        action: () -> Unit
+    ) {
+
+        val box = LinearLayout(this).apply {
+
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+
+            setPadding(
+                dp(12),
+                dp(13),
+                dp(12),
+                dp(12)
+            )
+
+            background = rounded(surface2)
+
+            setOnClickListener {
+                action()
+            }
+        }
+
+        box.addView(
+            tv(title, 13f, white, true)
+        )
+
+        box.addView(
+            tv(subtitle, 9f, muted).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        parent.addView(
+            box,
+            LinearLayout.LayoutParams(
+                0,
+                dp(82),
+                1f
+            )
+        )
+    }
+
+    // ------------------------------------------------------------
+    // SMALL NAVIGATION
+    // ------------------------------------------------------------
+
+    private fun navItem(
+        parent: LinearLayout,
+        title: String,
+        selected: Boolean,
+        action: () -> Unit
+    ) {
+
+        val item = LinearLayout(this).apply {
+
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+
+            setPadding(
+                dp(5),
+                dp(8),
+                dp(5),
+                dp(6)
+            )
+
+            setOnClickListener {
+                action()
+            }
+        }
+
+        val dot = TextView(this).apply {
+            text = "●"
+            textSize = 11f
+            gravity = Gravity.CENTER
+            setTextColor(
+                if (selected) cyan else dim
+            )
+        }
+
+        item.addView(dot)
+
+        item.addView(
+            tv(
+                title,
+                9f,
+                if (selected) white else muted,
+                selected
+            ).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(2), 0, 0)
+            }
+        )
+
+        parent.addView(
+            item,
+            LinearLayout.LayoutParams(
+                0,
+                dp(54),
+                1f
+            )
+        )
+    }
+
+    // ------------------------------------------------------------
+    // MAIN
+    // ------------------------------------------------------------
+
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
         super.onCreate(savedInstanceState)
 
         window.statusBarColor = bg
@@ -163,34 +334,87 @@ class MainActivity : Activity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(20), dp(18), dp(30))
+            setPadding(
+                dp(16),
+                dp(18),
+                dp(16),
+                dp(85)
+            )
         }
 
-        // ---------------------------------------------------------
+        // ========================================================
         // HEADER
-        // ---------------------------------------------------------
+        // ========================================================
 
-        root.addView(
-            text("GDMIE", 32f, cyan, true)
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        brand.addView(
+            tv(
+                "GDMIE",
+                29f,
+                cyan,
+                true
+            )
         )
 
-        root.addView(
-            text(
-                "GENERAL DECISION & MATHEMATICAL INTELLIGENCE ENGINE",
-                9f,
-                Color.rgb(95, 120, 145)
+        brand.addView(
+            tv(
+                "DECISION INTELLIGENCE ENGINE",
+                8f,
+                dim,
+                true
             ).apply {
-                setPadding(0, dp(3), 0, 0)
+                setPadding(0, dp(2), 0, 0)
+                letterSpacing = 0.08f
             }
         )
 
-        root.addView(space(24))
+        header.addView(
+            brand,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
 
-        // ---------------------------------------------------------
+        val profile = TextView(this).apply {
+            text = "●"
+            textSize = 20f
+            gravity = Gravity.CENTER
+            setTextColor(white)
+            background = rounded(
+                surface2,
+                20,
+                border
+            )
+        }
+
+        header.addView(
+            profile,
+            LinearLayout.LayoutParams(
+                dp(42),
+                dp(42)
+            )
+        )
+
+        root.addView(header)
+
+        root.addView(gap(24))
+
+        // ========================================================
         // GREETING
-        // ---------------------------------------------------------
+        // ========================================================
 
-        val hour = java.util.Calendar.getInstance()
+        val hour = java.util.Calendar
+            .getInstance()
             .get(java.util.Calendar.HOUR_OF_DAY)
 
         val greeting = when {
@@ -200,76 +424,116 @@ class MainActivity : Activity() {
         }
 
         root.addView(
-            text(greeting, 25f, white, true)
-        )
-
-        root.addView(
-            text(
-                "Decision intelligence at a glance.",
-                13f,
-                muted
-            ).apply {
-                setPadding(0, dp(5), 0, 0)
-            }
-        )
-
-        root.addView(space(18))
-
-        // ---------------------------------------------------------
-        // ENGINE STATUS
-        // ---------------------------------------------------------
-
-        val status = panel()
-
-        status.addView(
-            text("●  ENGINE READY", 12f, green, true)
-        )
-
-        status.addView(
-            text(
-                "Decision Intelligence System",
-                18f,
+            tv(
+                "$greeting",
+                25f,
                 white,
                 true
-            ).apply {
-                setPadding(0, dp(7), 0, 0)
-            }
-        )
-
-        status.addView(
-            text(
-                "General-purpose analysis engine is ready.",
-                11f,
-                muted
-            ).apply {
-                setPadding(0, dp(5), 0, 0)
-            }
-        )
-
-        root.addView(
-            status,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
             )
         )
 
-        root.addView(space(16))
-
-        // ---------------------------------------------------------
-        // PRIMARY ACTION
-        // ---------------------------------------------------------
-
-        val runButton = Button(this).apply {
-            text = "RUN GDM ENGINE"
-            textSize = 14f
-            setTextColor(Color.WHITE)
-            setTypeface(null, Typeface.BOLD)
-
-            background = GradientDrawable().apply {
-                setColor(blue)
-                cornerRadius = dp(16).toFloat()
+        root.addView(
+            tv(
+                "Smarter decisions. Brighter future.",
+                12f,
+                muted
+            ).apply {
+                setPadding(0, dp(5), 0, 0)
             }
+        )
+
+        root.addView(gap(16))
+
+        // ========================================================
+        // CATEGORIES
+        // ========================================================
+
+        val categories = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+        }
+
+        val chipRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        chip(chipRow, "Trading", true)
+        chip(chipRow, "Investing", false)
+        chip(chipRow, "Crypto", false)
+        chip(chipRow, "Life", false)
+
+        categories.addView(chipRow)
+
+        root.addView(
+            categories,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(40)
+            )
+        )
+
+        root.addView(gap(15))
+
+        // ========================================================
+        // MARKET SNAPSHOT
+        // ========================================================
+
+        sectionTitle(root, "MARKET SNAPSHOT")
+
+        val markets = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        marketCard(
+            markets,
+            "NIFTY",
+            "24,198.30",
+            "+0.74%"
+        )
+
+        markets.addView(
+            Space(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(9),
+                    1
+                )
+            }
+        )
+
+        marketCard(
+            markets,
+            "BANK NIFTY",
+            "51,240.70",
+            "+0.95%"
+        )
+
+        root.addView(markets)
+
+        root.addView(gap(15))
+
+        // ========================================================
+        // SEARCH
+        // ========================================================
+
+        val search = TextView(this).apply {
+
+            text = "⌕   Search Stock / Index / Asset"
+            textSize = 12f
+            setTextColor(muted)
+
+            gravity = Gravity.CENTER_VERTICAL
+
+            setPadding(
+                dp(16),
+                0,
+                dp(16),
+                0
+            )
+
+            background = rounded(
+                surface2,
+                15,
+                border
+            )
 
             setOnClickListener {
                 startActivity(
@@ -282,118 +546,175 @@ class MainActivity : Activity() {
         }
 
         root.addView(
-            runButton,
+            search,
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(58)
+                dp(50)
             )
         )
 
-        root.addView(space(22))
+        root.addView(gap(18))
 
-        // ---------------------------------------------------------
-        // LIVE OVERVIEW
-        // ---------------------------------------------------------
+        // ========================================================
+        // PRIMARY ACTION
+        // ========================================================
 
-        section(root, "LIVE OVERVIEW")
+        val run = Button(this).apply {
 
-        val overview = panel()
+            text = "RUN GDM ENGINE   →"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setTypeface(null, Typeface.BOLD)
 
-        overview.addView(
-            text("LATEST ANALYSIS", 11f, cyan, true)
+            background = rounded(
+                blue,
+                16,
+                blue,
+                0
+            )
+
+            setOnClickListener {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        DataInputActivity::class.java
+                    )
+                )
+            }
+        }
+
+        root.addView(
+            run,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(56)
+            )
         )
 
-        liveEdgeView = text("—", 38f, cyan, true).apply {
-            setPadding(0, dp(5), 0, 0)
-        }
-        overview.addView(liveEdgeView)
+        root.addView(gap(22))
 
-        overview.addView(
-            text("REVERSE EDGE", 11f, muted, true).apply {
+        // ========================================================
+        // LATEST ANALYSIS
+        // ========================================================
+
+        sectionTitle(root, "LATEST ANALYSIS")
+
+        val latest = card()
+
+        latest.addView(
+            tv(
+                "REVERSE EDGE",
+                10f,
+                muted,
+                true
+            )
+        )
+
+        edgeView = tv(
+            "—",
+            34f,
+            cyan,
+            true
+        ).apply {
+            setPadding(0, dp(4), 0, 0)
+        }
+
+        latest.addView(edgeView)
+
+        latest.addView(
+            tv(
+                "Latest GDMIE engine calculation",
+                10f,
+                dim
+            ).apply {
                 setPadding(0, dp(2), 0, 0)
             }
         )
 
-        liveMetricsView = text(
-            "Momentum: —    Risk: —    Confidence: —",
-            11f,
+        val metrics = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(0, dp(15), 0, 0)
+        }
+
+        momentumView = tv(
+            "Momentum\n—",
+            10f,
             muted,
             true
-        ).apply {
-            setPadding(0, dp(10), 0, 0)
-        }
-        overview.addView(liveMetricsView)
-
-        overview.addView(
-            text(
-                "Latest GDMIE calculation • updates automatically",
-                10f,
-                Color.rgb(95, 120, 145)
-            ).apply {
-                setPadding(0, dp(7), 0, 0)
-            }
         )
 
-        overview.addView(space(12))
-
-        overview.addView(
-            text(
-                "ENGINE SIGNALS",
-                10f,
-                cyan,
-                true
-            )
+        riskView = tv(
+            "Risk\n—",
+            10f,
+            muted,
+            true
         )
 
-        overview.addView(
-            text(
-                "PRESENT → EXPECTED → MARKET → GAP → MOVEMENT",
-                9f,
-                Color.rgb(80, 110, 140),
-                true
-            ).apply {
-                setPadding(0, dp(7), 0, 0)
-            }
+        confidenceView = tv(
+            "Confidence\n—",
+            10f,
+            muted,
+            true
         )
 
-        root.addView(
-            overview,
+        metrics.addView(
+            momentumView,
             LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+                0,
+                dp(45),
+                1f
             )
         )
 
-        root.addView(space(10))
+        metrics.addView(
+            riskView,
+            LinearLayout.LayoutParams(
+                0,
+                dp(45),
+                1f
+            )
+        )
 
-        val stats = LinearLayout(this).apply {
+        metrics.addView(
+            confidenceView,
+            LinearLayout.LayoutParams(
+                0,
+                dp(45),
+                1f
+            )
+        )
+
+        latest.addView(metrics)
+
+        latest.addView(
+            tv(
+                "PRESENT  →  EXPECTED  →  MARKET  →  GAP  →  MOVEMENT",
+                8f,
+                dim,
+                true
+            ).apply {
+                setPadding(0, dp(8), 0, 0)
+            }
+        )
+
+        root.addView(latest)
+
+        root.addView(gap(22))
+
+        // ========================================================
+        // INTELLIGENCE MODULES
+        // ========================================================
+
+        sectionTitle(root, "INTELLIGENCE")
+
+        val row1 = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
         }
 
-        statCard(stats, "PRESENT", "—", "Current value")
-        stats.addView(Space(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(8), 1)
-        })
-        statCard(stats, "EXPECTED", "—", "Expected value")
-        stats.addView(Space(this).apply {
-            layoutParams = LinearLayout.LayoutParams(dp(8), 1)
-        })
-        statCard(stats, "RISK", "—", "Risk factor")
-
-        root.addView(stats)
-
-        root.addView(space(22))
-
-        // ---------------------------------------------------------
-        // INTELLIGENCE
-        // ---------------------------------------------------------
-
-        section(root, "INTELLIGENCE")
-
-        menuButton(
-            root,
-            "MARKET ANALYSIS",
-            "Analyze present, expected, market and edge values"
+        featureButton(
+            row1,
+            "LIVE ANALYSIS",
+            "Real-time engine",
         ) {
             startActivity(
                 Intent(
@@ -403,12 +724,19 @@ class MainActivity : Activity() {
             )
         }
 
-        root.addView(space(9))
+        row1.addView(
+            Space(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(9),
+                    1
+                )
+            }
+        )
 
-        menuButton(
-            root,
+        featureButton(
+            row1,
             "COMPARE",
-            "Compare two decision profiles side-by-side"
+            "Side-by-side",
         ) {
             startActivity(
                 Intent(
@@ -418,27 +746,40 @@ class MainActivity : Activity() {
             )
         }
 
-        root.addView(space(9))
+        root.addView(row1)
 
-        menuButton(
-            root,
-            "DECISION HISTORY",
-            "View previous GDMIE engine analyses"
+        root.addView(gap(9))
+
+        val row2 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        featureButton(
+            row2,
+            "STRATEGY LAB",
+            "Test & backtest",
         ) {
             startActivity(
                 Intent(
                     this@MainActivity,
-                    DecisionHistoryActivity::class.java
+                    StrategyBacktestActivity::class.java
                 )
             )
         }
 
-        root.addView(space(9))
+        row2.addView(
+            Space(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(9),
+                    1
+                )
+            }
+        )
 
-        menuButton(
-            root,
+        featureButton(
+            row2,
             "ASK GDMIE",
-            "Ask the intelligence engine for structured reasoning"
+            "Ask the engine",
         ) {
             startActivity(
                 Intent(
@@ -448,12 +789,40 @@ class MainActivity : Activity() {
             )
         }
 
-        root.addView(space(9))
+        root.addView(row2)
 
-        menuButton(
-            root,
+        root.addView(gap(9))
+
+        val row3 = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        featureButton(
+            row3,
+            "HISTORY",
+            "Past decisions",
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DecisionHistoryActivity::class.java
+                )
+            )
+        }
+
+        row3.addView(
+            Space(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(9),
+                    1
+                )
+            }
+        )
+
+        featureButton(
+            row3,
             "WHY & DETAILS",
-            "Understand the factors behind every engine result"
+            "Understand results",
         ) {
             startActivity(
                 Intent(
@@ -463,71 +832,66 @@ class MainActivity : Activity() {
             )
         }
 
-        root.addView(space(22))
+        root.addView(row3)
 
-        // ---------------------------------------------------------
+        root.addView(gap(22))
+
+        // ========================================================
         // ENGINE FLOW
-        // ---------------------------------------------------------
+        // ========================================================
 
-        val flow = panel()
-
-        flow.addView(
-            text("ENGINE FLOW", 11f, cyan, true)
-        )
+        val flow = card()
 
         flow.addView(
-            text(
-                "PRESENT  →  EXPECTED  →  TARGET\n" +
-                "CONTEXT  →  MOMENTUM  →  GAP\n" +
-                "MOVEMENT →  RISK  →  TIMING\n" +
-                "REVERSE EDGE  →  DECISION",
-                11f,
-                muted
-            ).apply {
-                setPadding(0, dp(12), 0, 0)
-                setLineSpacing(dp(3).toFloat(), 1f)
-            }
-        )
-
-        root.addView(
-            flow,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+            tv(
+                "GDMIE ENGINE FLOW",
+                10f,
+                cyan,
+                true
             )
         )
 
-        root.addView(space(22))
-
-        // ---------------------------------------------------------
-        // UPCOMING MODULES
-        // ---------------------------------------------------------
-
-        section(root, "GDMIE ECOSYSTEM")
-
-        val ecosystem = panel()
-
-        val strategyButton = TextView(this).apply {
-            text = "STRATEGY & BACKTEST"
-            textSize = 13f
-            setTextColor(white)
-            setTypeface(null, Typeface.BOLD)
-            setPadding(0, 0, 0, 0)
-            setOnClickListener {
-                startActivity(
-                    Intent(
-                        this@MainActivity,
-                        StrategyBacktestActivity::class.java
-                    )
+        flow.addView(
+            tv(
+                "PRESENT  →  EXPECTED  →  TARGET\n" +
+                        "CONTEXT  →  MOMENTUM  →  GAP\n" +
+                        "MOVEMENT →  RISK  →  TIMING\n" +
+                        "REVERSE EDGE  →  DECISION",
+                10f,
+                muted
+            ).apply {
+                setPadding(0, dp(10), 0, 0)
+                setLineSpacing(
+                    dp(3).toFloat(),
+                    1f
                 )
             }
-        }
+        )
 
-        ecosystem.addView(strategyButton)
+        root.addView(flow)
+
+        root.addView(gap(22))
+
+        // ========================================================
+        // ECOSYSTEM
+        // ========================================================
+
+        sectionTitle(root, "GDMIE ECOSYSTEM")
+
+        val ecosystem = card()
 
         ecosystem.addView(
-            text(
-                "WATCHLIST  •  ALERTS  •  TOOLS  •  MULTI-ASSET",
+            tv(
+                "WATCHLIST   •   ALERTS   •   TOOLS",
+                10f,
+                white,
+                true
+            )
+        )
+
+        ecosystem.addView(
+            tv(
+                "MULTI-ASSET   •   LIFE DECISIONS   •   INSIGHTS",
                 10f,
                 muted
             ).apply {
@@ -535,58 +899,173 @@ class MainActivity : Activity() {
             }
         )
 
-        ecosystem.addView(
-            text(
-                "LIFE DECISIONS  •  PROFILE & INSIGHTS",
-                10f,
-                muted
-            ).apply {
-                setPadding(0, dp(4), 0, 0)
-            }
-        )
+        root.addView(ecosystem)
+
+        root.addView(gap(20))
+
+        // ========================================================
+        // FOOTER
+        // ========================================================
 
         root.addView(
-            ecosystem,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        )
-
-        root.addView(space(20))
-
-        root.addView(
-            text(
-                "GDMIE • GENERAL DECISION INTELLIGENCE",
+            tv(
+                "THINK SMARTER. DECIDE BETTER. LIVE AHEAD.",
                 9f,
-                Color.rgb(70, 95, 120)
+                dim,
+                true
             ).apply {
                 gravity = Gravity.CENTER
+                letterSpacing = 0.08f
             }
         )
 
         scroll.addView(root)
-        setContentView(scroll)
+
+        // ========================================================
+        // BOTTOM NAV
+        // ========================================================
+
+        val bottom = LinearLayout(this).apply {
+
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+
+            setPadding(
+                dp(7),
+                0,
+                dp(7),
+                0
+            )
+
+            background = rounded(
+                Color.rgb(7, 14, 26),
+                0,
+                border
+            )
+        }
+
+        navItem(
+            bottom,
+            "Home",
+            true
+        ) {
+            // Already on Home
+        }
+
+        navItem(
+            bottom,
+            "Markets",
+            false
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DataInputActivity::class.java
+                )
+            )
+        }
+
+        navItem(
+            bottom,
+            "Ask GDMIE",
+            false
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    AskGDMIEActivity::class.java
+                )
+            )
+        }
+
+        navItem(
+            bottom,
+            "Insights",
+            false
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DecisionHistoryActivity::class.java
+                )
+              )
+
+        }
+
+        navItem(
+            bottom,
+            "Profile",
+            false
+        ) {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    WhyDetailsActivity::class.java
+                )
+            )
+        }
+
+        val frame = FrameLayout(this)
+
+        frame.addView(
+            scroll,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        )
+
+        frame.addView(
+            bottom,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(58),
+                Gravity.BOTTOM
+            )
+        )
+
+        setContentView(frame)
+
         updateHomeOverview()
     }
 
+    // ============================================================
+    // HOME DATA
+    // ============================================================
 
     private fun updateHomeOverview() {
-        val prefs = getSharedPreferences("GDMIE_HOME", MODE_PRIVATE)
 
-        val edge = prefs.getString("edge", "—") ?: "—"
-        val momentum = prefs.getString("momentum", "—") ?: "—"
-        val risk = prefs.getString("risk", "—") ?: "—"
-        val confidence = prefs.getString("confidence", "—") ?: "—"
+        val prefs = getSharedPreferences(
+            "GDMIE_HOME",
+            MODE_PRIVATE
+        )
 
-        liveEdgeView?.text = edge
-        liveMetricsView?.text =
-            "Momentum: $momentum    Risk: $risk    Confidence: $confidence"
+        val edge =
+            prefs.getString("edge", "—") ?: "—"
+
+        val momentum =
+            prefs.getString("momentum", "—") ?: "—"
+
+        val risk =
+            prefs.getString("risk", "—") ?: "—"
+
+        val confidence =
+            prefs.getString("confidence", "—") ?: "—"
+
+        edgeView?.text = edge
+
+        momentumView?.text =
+            "Momentum\n$momentum"
+
+        riskView?.text =
+            "Risk\n$risk"
+
+        confidenceView?.text =
+            "Confidence\n$confidence"
     }
 
     override fun onResume() {
         super.onResume()
         updateHomeOverview()
     }
-
 }
