@@ -1,95 +1,62 @@
 package com.gdmie
 
 import kotlin.math.abs
-import kotlin.math.max
 
 object GDMEngine {
 
     /*
-     * GDMIE GENERAL REVERSE ENGINE v1.1
-     *
-     * CORE FORMULA — LOCKED
+     * GDMIE GENERAL REVERSE ENGINE v1.2
      *
      * PRESENT → EXPECTED → TARGET
-     *              ↓
-     *           MOMENTUM
-     *              ↓
-     *        REFERENCE GAP
-     *              ↓
-     * MOVEMENT → RISK → TIMING
-     *              ↓
-     *        REVERSE EDGE
-     *              ↓
-     *          CONFIDENCE
-     *              ↓
-     *      GENERAL DECISION
+     * MOMENTUM → REFERENCE GAP
+     * MOVEMENT → RISK + TIMING
+     * REVERSE EDGE → CONFIDENCE
      *
-     * v1.1:
-     * - Formula weights preserved
-     * - No silent normalization
-     * - Input-scale integrity check
-     * - Confidence guard for extreme scale mismatch
-     * - Transparent explanation
+     * IMPORTANT:
+     * Momentum inputs are normalized to prevent
+     * oversized raw values from dominating the engine.
      */
+
+    private fun normalizeMomentum(value: Double): Double {
+        if (value <= 0.0) return 0.0
+
+        // Converts any positive raw momentum into a 0–100 scale.
+        return (100.0 * value / (value + 100.0))
+            .coerceIn(0.0, 100.0)
+    }
 
     fun calculate(input: GDMInput): GDMResult {
 
         // ---------------------------------------------------------
-        // 0. INPUT SCALE INTEGRITY
+        // 1. NORMALIZE MOMENTUM
         // ---------------------------------------------------------
 
-        val baseline = max(
-            1.0,
-            max(
-                abs(input.presentValue),
-                max(
-                    abs(input.expectedValue),
-                    max(
-                        abs(input.targetValue),
-                        abs(input.exactMarketLine)
-                    )
-                )
-            )
-        )
+        val normalizedRecentMomentum =
+            normalizeMomentum(input.recentMomentum)
 
-        val momentumMagnitude = max(
-            abs(input.recentMomentum),
-            abs(input.immediateMomentum)
-        )
-
-        val momentumScaleRatio = momentumMagnitude / baseline
-
-        val scaleWarning = when {
-            momentumScaleRatio >= 10.0 ->
-                "WARNING: Momentum scale is extremely higher than the core-value scale."
-
-            momentumScaleRatio >= 5.0 ->
-                "WARNING: Momentum scale is significantly higher than the core-value scale."
-
-            else ->
-                "INPUT SCALE: Consistent."
-        }
+        val normalizedImmediateMomentum =
+            normalizeMomentum(input.immediateMomentum)
 
         // ---------------------------------------------------------
-        // 1. PRESENT → EXPECTED CORE
+        // 2. PRESENT → EXPECTED CORE
         // ---------------------------------------------------------
 
         val coreExpected =
             (input.presentValue * 0.35) +
             (input.expectedValue * 0.30) +
             (input.targetValue * 0.15) +
-            (input.recentMomentum * 0.10) +
-            (input.immediateMomentum * 0.10)
+            (normalizedRecentMomentum * 0.10) +
+            (normalizedImmediateMomentum * 0.10)
 
         // ---------------------------------------------------------
-        // 2. REFERENCE GAP
+        // 3. REFERENCE GAP
         // ---------------------------------------------------------
 
         val referenceGap =
             coreExpected - input.exactMarketLine
 
         // ---------------------------------------------------------
-        // 3. CONTEXT + MOVEMENT + RISK + TIMING
+        // 4. CONTEXT + MOVEMENT + RISK + TIMING
         // ---------------------------------------------------------
 
         val contextAdjustment =
@@ -99,57 +66,29 @@ object GDMEngine {
             (input.riskFactor * 0.40)
 
         // ---------------------------------------------------------
-        // 4. FINAL EXPECTED VALUE
+        // 5. FINAL EXPECTED VALUE
         // ---------------------------------------------------------
 
         val finalExpected =
             coreExpected + contextAdjustment
 
         // ---------------------------------------------------------
-        // 5. REVERSE EDGE
+        // 6. REVERSE EDGE
         // ---------------------------------------------------------
 
         val reverseEdge =
             finalExpected - input.exactMarketLine
 
         // ---------------------------------------------------------
-        // 6. MOMENTUM
-        // ---------------------------------------------------------
-
-        val momentum =
-            input.recentMomentum + input.immediateMomentum
-
-        // ---------------------------------------------------------
         // 7. CONFIDENCE
         // ---------------------------------------------------------
 
-        val rawConfidence = when {
+        val confidence = when {
             abs(reverseEdge) >= 20.0 -> 0.90
             abs(reverseEdge) >= 10.0 -> 0.75
             abs(reverseEdge) >= 5.0 -> 0.60
             else -> 0.50
         }
-
-        /*
-         * Confidence Guard
-         *
-         * The core formula is NOT changed.
-         * If input scales are extremely mismatched,
-         * confidence is capped because the large edge may
-         * be dominated by scale rather than decision quality.
-         */
-
-        val confidence =
-            when {
-                momentumScaleRatio >= 10.0 ->
-                    minOf(rawConfidence, 0.60)
-
-                momentumScaleRatio >= 5.0 ->
-                    minOf(rawConfidence, 0.75)
-
-                else ->
-                    rawConfidence
-            }
 
         // ---------------------------------------------------------
         // 8. GENERAL DECISION
@@ -162,12 +101,19 @@ object GDMEngine {
         }
 
         // ---------------------------------------------------------
-        // 9. EXPLANATION ENGINE
+        // 9. NORMALIZED MOMENTUM OUTPUT
+        // ---------------------------------------------------------
+
+        val momentum =
+            normalizedRecentMomentum + normalizedImmediateMomentum
+
+        // ---------------------------------------------------------
+        // 10. EXPLANATION ENGINE
         // ---------------------------------------------------------
 
         val explanation = buildString {
 
-            append("GDMIE REVERSE ENGINE v1.1\n\n")
+            append("GDMIE REVERSE ENGINE v1.2\n\n")
 
             append("PRESENT → EXPECTED → TARGET\n")
             append("CONTEXT → GAP → MOVEMENT\n")
@@ -175,19 +121,26 @@ object GDMEngine {
 
             append("INPUT INTEGRITY\n")
             append("--------------------------------\n")
+
             append(
-                "Core Reference Scale = %.2f\n"
-                    .format(baseline)
+                "Raw Recent Momentum = %.2f\n"
+                    .format(input.recentMomentum)
             )
+
             append(
-                "Momentum Scale = %.2f\n"
-                    .format(momentumMagnitude)
+                "Normalized Recent Momentum = %.2f\n"
+                    .format(normalizedRecentMomentum)
             )
+
             append(
-                "Momentum/Core Ratio = %.2fx\n"
-                    .format(momentumScaleRatio)
+                "Raw Immediate Momentum = %.2f\n"
+                    .format(input.immediateMomentum)
             )
-            append("$scaleWarning\n\n")
+
+            append(
+                "Normalized Immediate Momentum = %.2f\n\n"
+                    .format(normalizedImmediateMomentum)
+            )
 
             append("CORE EXPECTATION\n")
             append("--------------------------------\n")
@@ -208,13 +161,13 @@ object GDMEngine {
             )
 
             append(
-                "Recent Momentum × 10%% = %.2f\n"
-                    .format(input.recentMomentum * 0.10)
+                "Normalized Recent Momentum × 10%% = %.2f\n"
+                    .format(normalizedRecentMomentum * 0.10)
             )
 
             append(
-                "Immediate Momentum × 10%% = %.2f\n"
-                    .format(input.immediateMomentum * 0.10)
+                "Normalized Immediate Momentum × 10%% = %.2f\n"
+                    .format(normalizedImmediateMomentum * 0.10)
             )
 
             append(
@@ -282,7 +235,7 @@ object GDMEngine {
             )
 
             append(
-                "Momentum = %.2f\n"
+                "Normalized Momentum = %.2f\n"
                     .format(momentum)
             )
 
@@ -329,25 +282,24 @@ object GDMEngine {
                 }
             }
 
-            append("\n")
-
-            append("GDMIE PRINCIPLE\n")
+            append("\nGDMIE PRINCIPLE\n")
+            append("--------------------------------\n")
             append(
                 "Present data is compared with Expected, Target and Reference values.\n"
             )
             append(
-                "Momentum, Movement, Risk and Timing modify the decision context.\n"
+                "Momentum is normalized before entering the core calculation.\n"
             )
             append(
-                "The final Reverse Edge determines the strength and direction of the decision.\n"
+                "Movement, Risk and Timing modify the decision context.\n"
             )
             append(
-                "Input scale integrity is checked before confidence is reported."
+                "The final Reverse Edge determines the calculated decision signal."
             )
         }
 
         // ---------------------------------------------------------
-        // 10. RESULT
+        // 11. RESULT
         // ---------------------------------------------------------
 
         return GDMResult(
