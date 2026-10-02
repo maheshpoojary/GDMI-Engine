@@ -10,6 +10,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.gdmie.audio.GDMIEAudioManager
 
 class AskGDMIEActivity : Activity() {
 
@@ -211,7 +212,7 @@ class AskGDMIEActivity : Activity() {
             val categories = arrayOf(
                 "General",
                 "Financial",
-                "Market",
+                "Decision Context",
                 "Strategy",
                 "Life Decision"
             )
@@ -265,16 +266,15 @@ class AskGDMIEActivity : Activity() {
         val immediate = input(dataPanel, "Immediate Momentum")
         dataPanel.addView(space(7))
 
-        val advantage = input(dataPanel, "2-Min Market Advantage")
+        val advantage = input(dataPanel, "Immediate Advantage")
         dataPanel.addView(space(7))
 
-        val market = input(dataPanel, "Exact Market Line")
+        val market = input(dataPanel, "Reference Value")
         dataPanel.addView(space(7))
 
-        val odds = input(dataPanel, "Odds")
         dataPanel.addView(space(7))
 
-        val movement = input(dataPanel, "Odds Movement")
+        val movement = input(dataPanel, "Movement Factor")
         dataPanel.addView(space(7))
 
         val timing = input(dataPanel, "Timing Factor")
@@ -361,6 +361,11 @@ class AskGDMIEActivity : Activity() {
 
         run.setOnClickListener {
 
+            GDMIEAudioManager.playSfx(
+                this@AskGDMIEActivity,
+                R.raw.gdmie_audio_analysis
+            )
+
             val questionText =
                 question.text.toString().trim()
                     .ifEmpty { "Not specified" }
@@ -377,7 +382,6 @@ class AskGDMIEActivity : Activity() {
                     immediateMomentum = number(immediate),
                     twoMinMarketAdvantage = number(advantage),
                     exactMarketLine = number(market),
-                    odds = number(odds),
                     oddsMovement = number(movement),
                     timingFactor = number(timing),
                     riskFactor = number(risk)
@@ -402,7 +406,7 @@ class AskGDMIEActivity : Activity() {
                 "────────────────────────\n" +
                 "Present Value: %.2f\n".format(result.presentValue) +
                 "Expected Value: %.2f\n".format(result.expectedValue) +
-                "Market Value: %.2f\n".format(result.marketValue) +
+                "Reference Value: %.2f\n".format(result.marketValue) +
                 "Gap: %.2f\n\n".format(result.gap) +
 
                 "CONTEXT\n" +

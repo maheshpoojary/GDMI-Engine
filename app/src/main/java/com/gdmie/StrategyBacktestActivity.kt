@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.gdmie.audio.GDMIEAudioManager
 
 class StrategyBacktestActivity : Activity() {
 
@@ -122,10 +123,9 @@ class StrategyBacktestActivity : Activity() {
         val target = input("Target Value", "100")
         val recent = input("Recent Momentum", "0")
         val immediate = input("Immediate Momentum", "0")
-        val advantage = input("2-Min Market Advantage", "0")
-        val market = input("Exact Market Line", "100")
-        val odds = input("Odds", "0")
-        val movement = input("Odds Movement", "0")
+        val advantage = input("Immediate Advantage", "0")
+        val market = input("Reference Value", "100")
+        val movement = input("Movement Factor", "0")
         val timing = input("Timing Factor", "0")
         val risk = input("Risk Factor", "0")
 
@@ -135,10 +135,9 @@ class StrategyBacktestActivity : Activity() {
             target to "TARGET VALUE",
             recent to "RECENT MOMENTUM",
             immediate to "IMMEDIATE MOMENTUM",
-            advantage to "2-MIN MARKET ADVANTAGE",
-            market to "EXACT MARKET LINE",
-            odds to "ODDS",
-            movement to "ODDS MOVEMENT",
+            advantage to "IMMEDIATE ADVANTAGE",
+            market to "REFERENCE VALUE",
+            movement to "MOVEMENT FACTOR",
             timing to "TIMING FACTOR",
             risk to "RISK FACTOR"
         )
@@ -257,8 +256,7 @@ class StrategyBacktestActivity : Activity() {
                 .putString("immediate", immediate.text.toString())
                 .putString("advantage", advantage.text.toString())
                 .putString("market", market.text.toString())
-                .putString("odds", odds.text.toString())
-                .putString("movement", movement.text.toString())
+                    .putString("movement", movement.text.toString())
                 .putString("timing", timing.text.toString())
                 .putString("risk", risk.text.toString())
                 .apply()
@@ -278,8 +276,7 @@ class StrategyBacktestActivity : Activity() {
             immediate.setText(prefs.getString("immediate", immediate.text.toString()))
             advantage.setText(prefs.getString("advantage", advantage.text.toString()))
             market.setText(prefs.getString("market", market.text.toString()))
-            odds.setText(prefs.getString("odds", odds.text.toString()))
-            movement.setText(prefs.getString("movement", movement.text.toString()))
+                movement.setText(prefs.getString("movement", movement.text.toString()))
             timing.setText(prefs.getString("timing", timing.text.toString()))
             risk.setText(prefs.getString("risk", risk.text.toString()))
 
@@ -291,10 +288,12 @@ class StrategyBacktestActivity : Activity() {
         }
 
         saveButton.setOnClickListener {
+            GDMIEAudioManager.playUiClick(this@StrategyBacktestActivity)
             saveStrategy()
         }
 
         loadButton.setOnClickListener {
+            GDMIEAudioManager.playUiClick(this@StrategyBacktestActivity)
             loadStrategy()
         }
 
@@ -329,6 +328,11 @@ class StrategyBacktestActivity : Activity() {
         )
 
         runButton.setOnClickListener {
+            GDMIEAudioManager.playSfx(
+                this@StrategyBacktestActivity,
+                R.raw.gdmie_audio_analysis
+            )
+
             try {
                 val result = GDMEngine.calculate(
                     GDMInput(
@@ -339,7 +343,6 @@ class StrategyBacktestActivity : Activity() {
                         immediateMomentum = read(immediate),
                         twoMinMarketAdvantage = read(advantage),
                         exactMarketLine = read(market),
-                        odds = read(odds),
                         oddsMovement = read(movement),
                         timingFactor = read(timing),
                         riskFactor = read(risk)
@@ -360,7 +363,7 @@ class StrategyBacktestActivity : Activity() {
                 append("REVERSE EDGE     %.2f\n".format(result.edge))
                 append("CONFIDENCE       %.0f%%\n".format(result.confidence * 100))
                 append("EXPECTED VALUE   %.2f\n".format(result.expectedValue))
-                append("MARKET VALUE     %.2f\n".format(result.marketValue))
+                append("REFERENCE VALUE     %.2f\n".format(result.marketValue))
                 append("GAP              %.2f\n".format(result.gap))
                 append("MOMENTUM         %.2f\n".format(result.momentum))
                 append("RISK             %.2f\n".format(result.risk))
@@ -387,7 +390,7 @@ class StrategyBacktestActivity : Activity() {
                 append("Reverse Edge: %.2f\n".format(result.edge))
                 append("Confidence: %.0f%%\n".format(result.confidence * 100))
                 append("Expected Value: %.2f\n".format(result.expectedValue))
-                append("Market Value: %.2f\n".format(result.marketValue))
+                append("Reference Value: %.2f\n".format(result.marketValue))
                 append("Gap: %.2f\n".format(result.gap))
                 append("Momentum: %.2f\n".format(result.momentum))
                 append("Risk: %.2f".format(result.risk))

@@ -17,3 +17,43 @@ gradle-[0-9]*/
 # Signing keys
 *.jks
 *.keystore
+
+# Local backups / snapshots
+**/*.before-*
+**/*.BEFORE_*
+**/*.BEFORE-*
+**/*.BACKUP_*
+**/*.backup
+**/*.v*-backup
+**/*.v*-before
+**/*-backup
+**/*.crash-backup
+**/*.build-success-*
+**/*.a8-backup
+backups/
+checkpoints/
+
+# Python / generated local files
+__pycache__/
+*.pyc
+
+# Local logs / temporary analysis
+*.log
+daily_arena.txt
+gdmie_audit.txt
+gdmie_build.log
+build_error.log
+10
+5
+PY
+
+# Local signing / generated APK
+*.jks
+*.keystore
+*.apk
+
+# Audio backup directory
+app/src/main/res/raw.BEFORE_FUTURISTIC_SFX/
+
+# Manifest backup files
+app/src/main/AndroidManifest.xml.*

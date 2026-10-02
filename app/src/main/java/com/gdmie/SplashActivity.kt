@@ -7,106 +7,426 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
+import android.view.Window
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.gdmie.audio.GDMIEAudioManager
 
 class SplashActivity : Activity() {
 
-    private val bg = Color.rgb(3, 10, 20)
-    private val blue = Color.rgb(55, 165, 255)
+    private val bg = Color.rgb(2, 5, 15)
+    private val cyan = Color.rgb(35, 205, 255)
+    private val blue = Color.rgb(45, 145, 255)
+    private val purple = Color.rgb(155, 90, 255)
+    private val gold = Color.rgb(255, 205, 70)
     private val white = Color.WHITE
-    private val muted = Color.rgb(155, 180, 200)
+    private val muted = Color.rgb(150, 170, 195)
+
+    private fun dp(v: Int): Int =
+        (v * resources.displayMetrics.density).toInt()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val root = LinearLayout(this)
-        root.orientation = LinearLayout.VERTICAL
-        root.gravity = Gravity.CENTER
-        root.setPadding(28, 30, 28, 30)
-        root.background = GradientDrawable(
-            GradientDrawable.Orientation.TL_BR,
-            intArrayOf(
-                Color.rgb(2, 8, 18),
-                Color.rgb(4, 20, 38),
-                Color.rgb(2, 8, 18)
+        window.statusBarColor = bg
+        window.navigationBarColor = Color.rgb(5, 7, 18)
+
+        setContentView(createSplash())
+
+    }
+
+    private fun createSplash(): View {
+
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(dp(24), dp(28), dp(24), dp(24))
+
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                intArrayOf(
+                    Color.rgb(2, 5, 15),
+                    Color.rgb(6, 18, 42),
+                    Color.rgb(18, 7, 42),
+                    Color.rgb(3, 6, 18)
+                )
+            )
+        }
+
+        // Top AI badge
+        val badge = TextView(this).apply {
+            text = "✦  AI DECISION INTELLIGENCE"
+            textSize = 10f
+            setTextColor(cyan)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            letterSpacing = 0.08f
+            setPadding(dp(18), dp(9), dp(18), dp(9))
+
+            background = GradientDrawable().apply {
+                setColor(Color.rgb(8, 22, 42))
+                cornerRadius = dp(30).toFloat()
+                setStroke(dp(1), Color.rgb(35, 125, 190))
+            }
+        }
+
+        root.addView(
+            badge,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                dp(38)
             )
         )
 
-        val glow = TextView(this)
-        glow.text = "✦"
-        glow.textSize = 64f
-        glow.setTextColor(blue)
-        glow.gravity = Gravity.CENTER
-        root.addView(glow)
+        addSpace(root, 52)
 
-        val logo = TextView(this)
-        logo.text = "GDMIE"
-        logo.textSize = 52f
-        logo.setTextColor(white)
-        logo.typeface = Typeface.DEFAULT_BOLD
-        logo.gravity = Gravity.CENTER
-        root.addView(logo)
+        // Futuristic symbol
+        val symbol = TextView(this).apply {
+            text = "✦"
+            textSize = 62f
+            setTextColor(cyan)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setShadowLayer(
+                dp(18).toFloat(),
+                0f,
+                0f,
+                Color.rgb(20, 170, 255)
+            )
+        }
 
-        val subtitle = TextView(this)
-        subtitle.text = "DECISION INTELLIGENCE ENGINE"
-        subtitle.textSize = 13f
-        subtitle.setTextColor(blue)
-        subtitle.typeface = Typeface.DEFAULT_BOLD
-        subtitle.gravity = Gravity.CENTER
+        root.addView(
+            symbol,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(82)
+            )
+        )
+
+        addSpace(root, 8)
+
+        // Main logo
+        val logo = TextView(this).apply {
+            text = "GDMIE"
+            textSize = 58f
+            setTextColor(white)
+            typeface = Typeface.create(
+                Typeface.DEFAULT,
+                Typeface.BOLD
+            )
+            gravity = Gravity.CENTER
+            letterSpacing = 0.12f
+            setShadowLayer(
+                dp(10).toFloat(),
+                0f,
+                0f,
+                Color.rgb(90, 180, 255)
+            )
+        }
+
+        root.addView(
+            logo,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(82)
+            )
+        )
+
+        addSpace(root, 8)
+
+        val subtitle = TextView(this).apply {
+            text = "GENERAL DECISION & MATHEMATICAL\nINTELLIGENCE ENGINE"
+            textSize = 12f
+            setTextColor(cyan)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            letterSpacing = 0.05f
+            setLineSpacing(dp(3).toFloat(), 1f)
+        }
+
         root.addView(subtitle)
 
-        val line = TextView(this)
-        line.text = "SEE THE EDGE\nBEFORE YOU DECIDE"
-        line.textSize = 18f
-        line.setTextColor(white)
-        line.gravity = Gravity.CENTER
-        line.typeface = Typeface.DEFAULT_BOLD
-        root.addView(line)
+        addSpace(root, 26)
 
-        val description = TextView(this)
-        description.text = "Markets\nInvestments\nLife Decisions\nA Smarter You"
-        description.textSize = 15f
-        description.setTextColor(muted)
-        description.gravity = Gravity.CENTER
-        root.addView(description)
+        // Tagline
+        val tagline = TextView(this).apply {
+            text = "SEE THE EDGE\nBEFORE YOU DECIDE"
+            textSize = 21f
+            setTextColor(white)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            letterSpacing = 0.03f
+            setLineSpacing(dp(4).toFloat(), 1f)
+        }
 
-        val begin = Button(this)
-        begin.text = "LET'S BEGIN  →"
-        begin.textSize = 15f
-        begin.setTextColor(white)
-        begin.typeface = Typeface.DEFAULT_BOLD
-        begin.background = roundedButton(blue)
+        root.addView(tagline)
+
+        addSpace(root, 18)
+
+        val categories = TextView(this).apply {
+            text = "Finance     •     Career     •     Life Decisions"
+            textSize = 11f
+            setTextColor(muted)
+            gravity = Gravity.CENTER
+            letterSpacing = 0.02f
+        }
+
+        root.addView(categories)
+
+        addSpace(root, 28)
+
+        // Premium CTA
+        val begin = Button(this).apply {
+            text = "LET'S BEGIN   →"
+            textSize = 15f
+            setTextColor(white)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            isAllCaps = false
+            letterSpacing = 0.05f
+            includeFontPadding = false
+
+            background = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(
+                    Color.rgb(35, 145, 255),
+                    Color.rgb(45, 205, 255),
+                    Color.rgb(115, 90, 255)
+                )
+            ).apply {
+                cornerRadius = dp(18).toFloat()
+                setStroke(dp(1), Color.rgb(120, 225, 255))
+            }
+
+            elevation = dp(7).toFloat()
+
+            setOnClickListener {
+                GDMIEAudioManager.playUiClick(this@SplashActivity)
+                animate()
+                    .scaleX(0.96f)
+                    .scaleY(0.96f)
+                    .setDuration(80)
+                    .withEndAction {
+                        animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .withEndAction {
+                                startActivity(
+                                    Intent(
+                                        this@SplashActivity,
+                                        LoginActivity::class.java
+                                    )
+                                )
+                                finish()
+                            }
+                            .start()
+                    }
+                    .start()
+            }
+        }
 
         root.addView(
             begin,
             LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                58
+                dp(58)
             )
         )
 
-        val footer = TextView(this)
-        footer.text = "DATA • ANALYSIS • CLARITY • BETTER DECISION"
-        footer.textSize = 9f
-        footer.setTextColor(muted)
-        footer.gravity = Gravity.CENTER
+        addSpace(root, 14)
+
+        val footer = TextView(this).apply {
+            text = "DATA  •  ANALYSIS  •  CLARITY  •  BETTER DECISION"
+            textSize = 9f
+            setTextColor(muted)
+            gravity = Gravity.CENTER
+            letterSpacing = 0.04f
+        }
+
         root.addView(footer)
 
-        begin.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+        // Bottom identity
+        val bottom = TextView(this).apply {
+            text = "GDMIE  •  Learn  •  Analyze  •  Grow"
+            textSize = 9f
+            setTextColor(Color.rgb(100, 120, 150))
+            gravity = Gravity.CENTER
         }
 
-        setContentView(root)
+        root.addView(
+            bottom,
+            LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        )
+
+        // CINEMATIC ENTRY — GDMIE awakens
+        root.alpha = 0f
+
+        root.animate()
+            .alpha(1f)
+            .setDuration(320)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // AI badge — soft arrival
+        badge.alpha = 0f
+        badge.translationY = -dp(18).toFloat()
+
+        badge.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setStartDelay(60)
+            .setDuration(320)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Core energy symbol — awaken
+        symbol.alpha = 0f
+        symbol.scaleX = 0.35f
+        symbol.scaleY = 0.35f
+
+        symbol.animate()
+            .alpha(1f)
+            .scaleX(1.08f)
+            .scaleY(1.08f)
+            .setStartDelay(120)
+            .setDuration(420)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                symbol.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(180)
+                    .start()
+
+                symbol.animate()
+                    .scaleX(1.06f)
+                    .scaleY(1.06f)
+                    .setDuration(420)
+                    .withEndAction {
+                        symbol.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(420)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+
+        // GDMIE logo — cinematic rise
+        logo.alpha = 0f
+        logo.translationY = dp(28).toFloat()
+        logo.scaleX = 0.92f
+        logo.scaleY = 0.92f
+
+        logo.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setStartDelay(220)
+            .setDuration(420)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Subtitle
+        subtitle.alpha = 0f
+        subtitle.translationY = dp(18).toFloat()
+
+        subtitle.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setStartDelay(320)
+            .setDuration(320)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Tagline
+        tagline.alpha = 0f
+        tagline.translationY = dp(22).toFloat()
+
+        tagline.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setStartDelay(400)
+            .setDuration(380)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .start()
+
+        // Categories
+        categories.alpha = 0f
+
+        categories.animate()
+            .alpha(1f)
+            .setStartDelay(470)
+            .setDuration(450)
+            .start()
+
+        // Main CTA — energetic arrival
+        begin.alpha = 0f
+        begin.translationY = dp(26).toFloat()
+        begin.scaleX = 0.94f
+        begin.scaleY = 0.94f
+
+        begin.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setStartDelay(550)
+            .setDuration(400)
+            .setInterpolator(AccelerateDecelerateInterpolator())
+            .withEndAction {
+                begin.animate()
+                    .scaleX(1.015f)
+                    .scaleY(1.015f)
+                    .setDuration(420)
+                    .withEndAction {
+                        begin.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(420)
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+
+        // Footer
+        footer.alpha = 0f
+
+        footer.animate()
+            .alpha(1f)
+            .setStartDelay(700)
+            .setDuration(450)
+            .start()
+
+        // Bottom identity
+        bottom.alpha = 0f
+        bottom.animate()
+            .alpha(1f)
+            .setStartDelay(850)
+            .setDuration(320)
+            .start()
+
+        return root
     }
 
-    private fun roundedButton(color: Int): GradientDrawable {
-        return GradientDrawable().apply {
-            setColor(color)
-            cornerRadius = 60f
-            setStroke(2, Color.WHITE)
-        }
+    private fun addSpace(root: LinearLayout, height: Int) {
+        root.addView(
+            View(this),
+            LinearLayout.LayoutParams(
+                1,
+                dp(height)
+            )
+        )
     }
 }

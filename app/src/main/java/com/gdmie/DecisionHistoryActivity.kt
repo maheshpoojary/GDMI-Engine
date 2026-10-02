@@ -9,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.gdmie.audio.GDMIEAudioManager
 
 class DecisionHistoryActivity : Activity() {
 
@@ -67,6 +68,37 @@ class DecisionHistoryActivity : Activity() {
             setPadding(dp(18), dp(20), dp(18), dp(30))
         }
 
+
+        val statsPrefs =
+            getSharedPreferences("GDMIE_RESULT_STATS", MODE_PRIVATE)
+
+        val wins = statsPrefs.getInt("wins", 0)
+        val losses = statsPrefs.getInt("losses", 0)
+        val neutral = statsPrefs.getInt("neutral", 0)
+        val total = wins + losses + neutral
+
+        val summaryCard = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(16), dp(18), dp(16))
+            setBackgroundColor(card)
+        }
+
+        val summaryTitle = TextView(this).apply {
+            text = "RESULT SUMMARY"
+            textSize = 13f
+            setTextColor(cyan)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        summaryCard.addView(summaryTitle)
+
+        val summaryStats = TextView(this).apply {
+            text = "TOTAL  $total    •    WIN  $wins    •    LOSS  $losses    •    OTHER  $neutral"
+            textSize = 14f
+            setTextColor(white)
+            setPadding(0, dp(10), 0, 0)
+        }
+        summaryCard.addView(summaryStats)
+
         root.addView(text("DECISION HISTORY", 28f, cyan, true))
 
         root.addView(
@@ -95,6 +127,8 @@ class DecisionHistoryActivity : Activity() {
 
         val prefs = getSharedPreferences("GDMIE_HISTORY", MODE_PRIVATE)
         val count = prefs.getInt("count", 0)
+
+        val checkPrefs = getSharedPreferences("GDMIE_CHECK", MODE_PRIVATE)
 
         if (count == 0) {
             val empty = card()
@@ -208,6 +242,42 @@ class DecisionHistoryActivity : Activity() {
                     }
                 )
 
+                val outcomeStatus = checkPrefs.getString(
+                    "status_$i",
+                    "PENDING"
+                ) ?: "PENDING"
+
+                val actualValue = checkPrefs.getString(
+                    "actual_$i",
+                    ""
+                ) ?: ""
+
+                val resultColor = when (outcomeStatus) {
+                    "WIN" -> green
+                    "LOSS" -> red
+                    else -> cyan
+                }
+
+                val resultText =
+                    if (outcomeStatus == "PENDING") {
+                        "RESULT\n◷ PENDING"
+                    } else {
+                        "RESULT\n✓ VERIFIED\n" +
+                        "Actual Value     $actualValue\n" +
+                        "Outcome          $outcomeStatus"
+                    }
+
+                item.addView(
+                    text(
+                        resultText,
+                        12f,
+                        resultColor,
+                        true
+                    ).apply {
+                        setPadding(0, dp(12), 0, 0)
+                    }
+                )
+
                 historyContainer.addView(item)
 
                 if (i > 1) {
@@ -229,6 +299,11 @@ class DecisionHistoryActivity : Activity() {
             }
 
             setOnClickListener {
+            GDMIEAudioManager.playUiClick(
+                this@DecisionHistoryActivity
+            )
+
+            
                 prefs.edit().clear().apply()
                 Toast.makeText(
                     this@DecisionHistoryActivity,

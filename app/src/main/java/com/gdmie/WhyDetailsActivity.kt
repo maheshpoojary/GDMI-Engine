@@ -127,7 +127,7 @@ class WhyDetailsActivity : Activity() {
             text(
                 "GDMIE does not rely on a single input. " +
                 "It combines present conditions, expected value, " +
-                "market context, momentum, movement, risk and timing " +
+                "decision context, momentum, movement, risk and timing " +
                 "to calculate a structured Reverse Edge.",
                 14f,
                 muted
@@ -178,8 +178,8 @@ class WhyDetailsActivity : Activity() {
         addFactor(
             root,
             "03",
-            "MARKET VALUE",
-            "The exact market reference entered by the user. " +
+            "REFERENCE VALUE",
+            "The exact reference value entered by the user. " +
                 "GDMIE compares this against the expected value.",
             blue
         )
@@ -189,8 +189,8 @@ class WhyDetailsActivity : Activity() {
         addFactor(
             root,
             "04",
-            "MARKET GAP",
-            "The difference between expected value and market value. " +
+            "REFERENCE GAP",
+            "The difference between expected value and reference value. " +
                 "The gap is one of the core inputs into Reverse Edge.",
             green
         )
@@ -202,7 +202,7 @@ class WhyDetailsActivity : Activity() {
             "05",
             "MOMENTUM",
             "Recent momentum, immediate momentum and the 2-minute " +
-                "market advantage are combined into the momentum factor.",
+                "immediate advantage is combined into the momentum factor.",
             green
         )
 
@@ -212,8 +212,8 @@ class WhyDetailsActivity : Activity() {
             root,
             "06",
             "MOVEMENT",
-            "Odds movement provides additional context about how the " +
-                "market value is changing.",
+            "Movement provides additional context about how the " +
+                "reference value is changing.",
             cyan
         )
 
@@ -249,7 +249,7 @@ class WhyDetailsActivity : Activity() {
 
         flow.addView(
             text(
-                "PRESENT\n↓\nEXPECTED\n↓\nMARKET\n↓\nGAP\n↓\nMOMENTUM + MOVEMENT\n↓\nRISK + TIMING\n↓\nREVERSE EDGE\n↓\nDECISION",
+                "PRESENT\n↓\nEXPECTED\n↓\nREFERENCE\n↓\nGAP\n↓\nMOMENTUM + MOVEMENT\n↓\nRISK + TIMING\n↓\nREVERSE EDGE\n↓\nDECISION",
                 13f,
                 white,
                 true

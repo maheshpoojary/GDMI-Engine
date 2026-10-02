@@ -8,7 +8,6 @@ data class GDMIERequest(
     val immediateMomentum: Double,
     val twoMinMarketAdvantage: Double,
     val exactMarketLine: Double,
-    val odds: Double,
     val oddsMovement: Double,
     val timingFactor: Double,
     val riskFactor: Double

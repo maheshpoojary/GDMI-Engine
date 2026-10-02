@@ -26,7 +26,6 @@ object GDMIEEngineGateway {
                     immediateMomentum = input.immediateMomentum,
                     twoMinMarketAdvantage = input.twoMinMarketAdvantage,
                     exactMarketLine = input.exactMarketLine,
-                    odds = input.odds,
                     oddsMovement = input.oddsMovement,
                     timingFactor = input.timingFactor,
                     riskFactor = input.riskFactor

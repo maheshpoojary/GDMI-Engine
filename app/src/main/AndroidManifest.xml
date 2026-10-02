@@ -4,10 +4,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".GDMIEApplication"
         android:allowBackup="true"
         android:label="GDMIE"
+        android:icon="@drawable/gdmie_cosmic_launcher"
+        android:roundIcon="@drawable/gdmie_cosmic_launcher"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <activity android:name=".GameOutcomeActivity" />
 
         <activity
             android:name=".SplashActivity"
@@ -21,13 +25,30 @@
         </activity>
 
         <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GuestWelcomeActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
 
         <activity
-            android:name=".DataInputActivity"
+            android:name=".ProfileActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".QuickDecisionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QuickDecisionFullActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DataInputActivity"
+            android:exported="false" />
         <activity
             android:name=".CompareActivity"
             android:exported="false" />
@@ -35,12 +56,34 @@
         <activity
             android:name=".DecisionOutputActivity"
             android:exported="false" />
+        <activity android:name="com.gdmie.OutcomeCheckActivity" android:exported="true" />
 
         <activity android:name=".AskGDMIEActivity" />
             <activity android:name=".DecisionHistoryActivity" />
         <activity android:name=".WhyDetailsActivity" android:exported="false" />
         <activity android:name=".StrategyBacktestActivity" android:exported="false" />
         <activity android:name=".BacktestHistoryActivity" android:exported="false" />
+        <activity
+            android:name=".DecisionChallengeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ChallengeScenarioActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DailyRevealActivity"
+            android:exported="false" />
+        <activity android:name=".DailyLearningActivity" android:exported="false" />
+        <activity
+            android:name=".LiveAnalysisActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GDMEngineBrainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CosmosActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

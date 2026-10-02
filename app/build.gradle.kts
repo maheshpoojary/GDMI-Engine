@@ -18,9 +18,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file(System.getProperty("user.home") + "/GDMIE-release.jks")
-            storePassword = System.getenv("GDMIE_STORE_PASSWORD")
+            storePassword = providers.gradleProperty("GDMIE_STORE_PASSWORD").orNull
             keyAlias = "gdmie"
-            keyPassword = System.getenv("GDMIE_KEY_PASSWORD")
+            keyPassword = providers.gradleProperty("GDMIE_KEY_PASSWORD").orNull
         }
     }
 

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.gdmie.audio.GDMIEAudioManager
 
 class BacktestHistoryActivity : Activity() {
 
@@ -178,6 +179,10 @@ class BacktestHistoryActivity : Activity() {
             )
 
             clearButton.setOnClickListener {
+                GDMIEAudioManager.playUiClick(
+                    this@BacktestHistoryActivity
+                )
+
                 prefs.edit().clear().apply()
                 Toast.makeText(
                     this,
