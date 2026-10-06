@@ -11,6 +11,9 @@
         android:roundIcon="@drawable/gdmie_cosmic_launcher"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9089838217001612~8329522865"/>
         <activity android:name=".GameOutcomeActivity" />
 
         <activity

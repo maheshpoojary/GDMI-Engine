@@ -1,6 +1,7 @@
 package com.gdmie
 
 import android.app.Activity
+import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
@@ -35,6 +36,25 @@ class SplashActivity : Activity() {
         window.navigationBarColor = Color.rgb(5, 7, 18)
 
         setContentView(createSplash())
+
+        // Guest sessions must not be auto-restored as Firebase accounts.
+        val accountPrefs =
+            getSharedPreferences("GDMIE_ACCOUNT", MODE_PRIVATE)
+        val guestMode =
+            accountPrefs.getBoolean("guest_mode", false)
+
+        // Returning Firebase users skip Login and go directly to Home.
+        if (!guestMode && FirebaseAuth.getInstance().currentUser != null) {
+            startActivity(
+                Intent(
+                    this@SplashActivity,
+                    MainActivity::class.java
+                )
+            )
+            overridePendingTransition(0, 0)
+            finish()
+            return
+        }
 
     }
 

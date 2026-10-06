@@ -562,6 +562,17 @@ Take another look at the situation before making the next move.
                                 "LEVEL $level\n\n" +
                                 "Your decision has been recorded."
                             )
+                            .setNeutralButton("🎁 WATCH +10 XP") { _, _ ->
+                                RewardedAdManager.show(
+                                    this@GameOutcomeActivity
+                                ) { awarded ->
+                                    Toast.makeText(
+                                        this@GameOutcomeActivity,
+                                        "+$awarded XP earned!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                             .setPositiveButton("NEXT CHALLENGE") { _, _ ->
 
                                 val next = Intent(

@@ -15,7 +15,7 @@ import android.widget.Switch
 import com.gdmie.audio.GDMIEAudioManager
 import com.gdmie.game.GDMIEGameProgress
 
-class ProfileActivity : Activity() {
+class ProfileActivity : GDMIEBaseActivity() {
 
     private val bg = Color.rgb(2, 7, 18)
     private val card = Color.argb(175, 9, 25, 50)
@@ -385,6 +385,301 @@ class ProfileActivity : Activity() {
                 topMargin = dp(12)
             }
         )
+
+        // PRIVACY POLICY
+        val privacyCard = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(18), dp(18), dp(18))
+            background = glass(purple)
+            elevation = dp(8).toFloat()
+        }
+
+        privacyCard.addView(
+            tv("🔒  PRIVACY & DATA", 11f, cyan, true)
+        )
+
+        privacyCard.addView(
+            tv(
+                "Read how GDMIE handles your account, progress, ads and data.",
+                12f,
+                white,
+                true
+            ).apply {
+                setPadding(0, dp(9), 0, dp(12))
+            }
+        )
+
+        val privacyButton = tv(
+            "VIEW PRIVACY POLICY  →",
+            11f,
+            white,
+            true
+        ).apply {
+            gravity = Gravity.CENTER
+            setPadding(0, dp(13), 0, dp(13))
+            background = glass(cyan)
+            setOnClickListener {
+                startActivity(
+                    android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://gdmie-d474a.web.app")
+                    )
+                )
+            }
+        }
+
+        privacyCard.addView(
+            privacyButton,
+            LinearLayout.LayoutParams(-1, dp(50))
+        )
+
+        root.addView(
+            privacyCard,
+            LinearLayout.LayoutParams(-1, dp(174)).apply {
+                topMargin = dp(12)
+            }
+        )
+
+        if (loginMethod != "GUEST MODE") {
+            val logoutButton = tv("LOG OUT  →", 13f, white, true).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(16), 0, dp(16))
+                background = glass(cyan)
+                setOnClickListener {
+                    android.app.AlertDialog.Builder(this@ProfileActivity)
+                        .setTitle("LOG OUT")
+                        .setMessage("Sign out of this GDMIE account on this device?")
+                        .setNegativeButton("CANCEL", null)
+                        .setPositiveButton("LOG OUT") { _, _ ->
+                            com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                            getSharedPreferences("GDMIE_GAME_PROGRESS", MODE_PRIVATE)
+                                .edit()
+                                .clear()
+                                .apply()
+                            getSharedPreferences("GDMIE_ACCOUNT", MODE_PRIVATE).edit().clear().apply()
+                            startActivity(android.content.Intent(this@ProfileActivity, LoginActivity::class.java))
+                            finishAffinity()
+                        }
+                        .show()
+                }
+            }
+            root.addView(logoutButton, LinearLayout.LayoutParams(-1, dp(58)).apply {
+                topMargin = dp(14)
+            })
+        }
+        if (loginMethod == "GUEST MODE") {
+            val accountPrompt = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(18), dp(18), dp(18), dp(18))
+                background = glass(purple)
+                elevation = dp(8).toFloat()
+            }
+
+            accountPrompt.addView(
+                tv("🔐  GDMIE ACCOUNT", 13f, cyan, true)
+            )
+
+            accountPrompt.addView(
+                tv(
+                    "Save your progress.\nKeep your XP, Level, Streak\nand decision history.",
+                    12f,
+                    white,
+                    true
+                ).apply {
+                    setPadding(0, dp(10), 0, dp(12))
+                }
+            )
+
+            val connectButton = tv(
+                "CONTINUE WITH EMAIL  →",
+                12f,
+                white,
+                true
+            ).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(14), 0, dp(14))
+                background = glass(cyan)
+                setOnClickListener {
+                    startActivity(
+                        android.content.Intent(
+                            this@ProfileActivity,
+                            LoginActivity::class.java
+                        )
+                    )
+                }
+            }
+
+            accountPrompt.addView(
+                connectButton,
+                LinearLayout.LayoutParams(-1, dp(52))
+            )
+
+            accountPrompt.addView(
+                tv(
+                    "NOT NOW",
+                    10f,
+                    muted,
+                    true
+                ).apply {
+                    gravity = Gravity.CENTER
+                    setPadding(0, dp(12), 0, 0)
+                }
+            )
+
+            root.addView(
+                accountPrompt,
+                LinearLayout.LayoutParams(-1, dp(205)).apply {
+                    topMargin = dp(12)
+                }
+            )
+        }
+
+        if (loginMethod != "GUEST MODE") {
+            val deleteAccountButton = tv(
+                "DELETE GDMIE ACCOUNT",
+                11f,
+                Color.rgb(255, 120, 120),
+                true
+            ).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(14), 0, dp(14))
+                background = glass(Color.rgb(70, 25, 35))
+
+                setOnClickListener {
+                    val passwordInput = android.widget.EditText(this@ProfileActivity).apply {
+                        hint = "Enter your password"
+                        inputType =
+                            android.text.InputType.TYPE_CLASS_TEXT or
+                            android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                        setPadding(dp(16), dp(10), dp(16), dp(10))
+                    }
+
+                    val box = LinearLayout(this@ProfileActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setPadding(dp(20), dp(4), dp(20), 0)
+                        addView(
+                            tv(
+                                "This permanently deletes your GDMIE account and cloud profile.",
+                                11f,
+                                muted
+                            ),
+                            LinearLayout.LayoutParams(-1, dp(58))
+                        )
+                        addView(
+                            passwordInput,
+                            LinearLayout.LayoutParams(-1, dp(54))
+                        )
+                    }
+
+                    android.app.AlertDialog.Builder(this@ProfileActivity)
+                        .setTitle("DELETE GDMIE ACCOUNT")
+                        .setView(box)
+                        .setNegativeButton("CANCEL", null)
+                        .setPositiveButton("DELETE") { _, _ ->
+                            val password = passwordInput.text.toString()
+
+                            if (password.isBlank()) {
+                                android.widget.Toast.makeText(
+                                    this@ProfileActivity,
+                                    "Enter your password to continue.",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                return@setPositiveButton
+                            }
+
+                            val auth =
+                                com.google.firebase.auth.FirebaseAuth.getInstance()
+                            val user = auth.currentUser
+
+                            if (user == null || user.email.isNullOrBlank()) {
+                                android.widget.Toast.makeText(
+                                    this@ProfileActivity,
+                                    "Account session not found.",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                                return@setPositiveButton
+                            }
+
+                            val email = user.email!!
+                            val uid = user.uid
+
+                            val credential =
+                                com.google.firebase.auth.EmailAuthProvider
+                                    .getCredential(email, password)
+
+                            user.reauthenticate(credential)
+                                .addOnSuccessListener {
+                                    com.google.firebase.firestore.FirebaseFirestore
+                                        .getInstance()
+                                        .collection("users")
+                                        .document(uid)
+                                        .delete()
+                                        .addOnSuccessListener {
+                                            user.delete()
+                                                .addOnSuccessListener {
+                                                    getSharedPreferences(
+                                                        "GDMIE_GAME_PROGRESS",
+                                                        MODE_PRIVATE
+                                                    ).edit()
+                                                        .clear()
+                                                        .apply()
+
+                                                    getSharedPreferences(
+                                                        "GDMIE_ACCOUNT",
+                                                        MODE_PRIVATE
+                                                    ).edit()
+                                                        .clear()
+                                                        .apply()
+
+                                                    android.widget.Toast.makeText(
+                                                        this@ProfileActivity,
+                                                        "GDMIE account deleted.",
+                                                        android.widget.Toast.LENGTH_LONG
+                                                    ).show()
+
+                                                    startActivity(
+                                                        android.content.Intent(
+                                                            this@ProfileActivity,
+                                                            LoginActivity::class.java
+                                                        )
+                                                    )
+                                                    finishAffinity()
+                                                }
+                                                .addOnFailureListener {
+                                                    android.widget.Toast.makeText(
+                                                        this@ProfileActivity,
+                                                        "Account deletion failed. Please try again.",
+                                                        android.widget.Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                        }
+                                        .addOnFailureListener {
+                                            android.widget.Toast.makeText(
+                                                this@ProfileActivity,
+                                                "Cloud profile could not be deleted.",
+                                                android.widget.Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                }
+                                .addOnFailureListener {
+                                    android.widget.Toast.makeText(
+                                        this@ProfileActivity,
+                                        "Incorrect password. Account was not deleted.",
+                                        android.widget.Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                        }
+                        .show()
+                }
+            }
+
+            root.addView(
+                deleteAccountButton,
+                LinearLayout.LayoutParams(-1, dp(54)).apply {
+                    topMargin = dp(10)
+                }
+            )
+        }
 
         // ACCOUNT STATUS
         val account = LinearLayout(this).apply {

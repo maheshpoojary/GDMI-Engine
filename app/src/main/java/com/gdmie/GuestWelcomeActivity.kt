@@ -270,6 +270,16 @@ class GuestWelcomeActivity : Activity() {
                     R.raw.gdmie_guest_home
                 )
 
+                startActivity(
+                    Intent(
+                        this@GuestWelcomeActivity,
+                        MainActivity::class.java
+                    )
+                )
+                overridePendingTransition(0, 0)
+                finish()
+                return@setOnClickListener
+
                 animate()
                     .scaleX(0.96f)
                     .scaleY(0.96f)

@@ -1524,6 +1524,15 @@ class CosmosActivity : Activity() {
                     AlertDialog.Builder(this@CosmosActivity)
                         .setTitle("🧠 GDMIE ANALYSIS")
                         .setView(analysisLayout)
+                        .setNeutralButton("🎁 WATCH +10 XP") { _, _ ->
+                            RewardedAdManager.show(this@CosmosActivity) { awarded ->
+                                Toast.makeText(
+                                    this@CosmosActivity,
+                                    "+$awarded XP earned!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
                         .setPositiveButton("DONE") { dialog, _ ->
                             dialog.dismiss()
 
@@ -4207,6 +4216,15 @@ class CosmosActivity : Activity() {
                                 AlertDialog.Builder(this@CosmosActivity)
                                     .setTitle("🧠 GDMIE ANALYSIS")
                                     .setView(analysisLayout)
+                                    .setNeutralButton("🎁 WATCH +10 XP") { _, _ ->
+                                        RewardedAdManager.show(this@CosmosActivity) { awarded ->
+                                            Toast.makeText(
+                                                this@CosmosActivity,
+                                                "+$awarded XP earned!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                                     .setPositiveButton("DONE") { dialog, _ ->
                                         dialog.dismiss()
 
@@ -6409,6 +6427,15 @@ class CosmosActivity : Activity() {
                                   AlertDialog.Builder(this@CosmosActivity)
                                       .setTitle("🧠 GDMIE ANALYSIS")
                                       .setView(analysisLayout)
+                                      .setNeutralButton("🎁 WATCH +10 XP") { _, _ ->
+                                          RewardedAdManager.show(this@CosmosActivity) { awarded ->
+                                              Toast.makeText(
+                                                  this@CosmosActivity,
+                                                  "+$awarded XP earned!",
+                                                  Toast.LENGTH_SHORT
+                                              ).show()
+                                          }
+                                      }
                                       .setPositiveButton("DONE") { dialog, _ ->
                                           dialog.dismiss()
 
@@ -10091,6 +10118,15 @@ styleCinematicDialog(
                                 AlertDialog.Builder(this@CosmosActivity)
                                     .setTitle("🧠 GDMIE ANALYSIS")
                                     .setMessage(analysis.toString())
+                                    .setNeutralButton("🎁 WATCH +10 XP") { _, _ ->
+                                        RewardedAdManager.show(this@CosmosActivity) { awarded ->
+                                            Toast.makeText(
+                                                this@CosmosActivity,
+                                                "+$awarded XP earned!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                                     .setPositiveButton("DONE") { d, _ ->
                                         d.dismiss()
                                         showSpaceReward(node)

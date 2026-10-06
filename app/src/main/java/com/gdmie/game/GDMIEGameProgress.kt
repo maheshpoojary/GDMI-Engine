@@ -24,6 +24,8 @@ object GDMIEGameProgress {
             .putInt(DECISIONS, newDecisions)
             .apply()
 
+        syncCloud(context)
+
         return resultXp
     }
 
@@ -36,6 +38,8 @@ object GDMIEGameProgress {
             .putInt(XP, newXp)
             .putInt(LEVEL, newLevel)
             .apply()
+
+        syncCloud(context)
 
         return xp
     }
@@ -83,6 +87,8 @@ object GDMIEGameProgress {
             .putBoolean(key, true)
             .apply()
 
+        syncCloud(context)
+
         return AnalysisXpResult(
             awardedXp = xp,
             oldXp = oldXp,
@@ -91,6 +97,34 @@ object GDMIEGameProgress {
             newLevel = newLevel,
             levelUp = levelUp
         )
+    }
+
+    // Rewarded Ad XP — one reward per unique completed ad
+    fun addRewardedAdXpOnce(
+        context: Context,
+        rewardId: String,
+        xp: Int = 10
+    ): Int {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val key = "rewarded_ad_xp_$rewardId"
+
+        if (prefs.getBoolean(key, false)) {
+            return 0
+        }
+
+        val oldXp = prefs.getInt(XP, 0)
+        val newXp = oldXp + xp
+        val newLevel = calculateLevel(newXp)
+
+        prefs.edit()
+            .putInt(XP, newXp)
+            .putInt(LEVEL, newLevel)
+            .putBoolean(key, true)
+            .apply()
+
+        syncCloud(context)
+
+        return xp
     }
 
     fun addOutcomeXpOnce(
@@ -113,6 +147,8 @@ object GDMIEGameProgress {
             .putInt(LEVEL, newLevel)
             .putBoolean(key, true)
             .apply()
+
+        syncCloud(context)
 
         return xp
     }
@@ -180,6 +216,8 @@ object GDMIEGameProgress {
             .putString("daily_last_date", today)
             .apply()
 
+        syncCloud(context)
+
         return xp
     }
 
@@ -245,8 +283,28 @@ object GDMIEGameProgress {
         return addDecision(context, xp)
     }
 
+    private fun syncCloud(context: Context) {
+        com.gdmie.GDMIECloudProfile.syncProfile(context)
+    }
+
     fun calculateLevel(xp: Int): Int =
         (xp / 100) + 1
+
+    fun restoreFromCloud(
+        context: Context,
+        xp: Int,
+        level: Int,
+        decisions: Int,
+        streak: Int
+    ) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(XP, xp.coerceAtLeast(0))
+            .putInt(LEVEL, level.coerceAtLeast(1))
+            .putInt(DECISIONS, decisions.coerceAtLeast(0))
+            .putInt(STREAK, streak.coerceAtLeast(0))
+            .apply()
+    }
 
     fun getXp(context: Context): Int =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -272,6 +330,7 @@ object GDMIEGameProgress {
             .edit()
             .putInt(STREAK, streak.coerceAtLeast(0))
             .apply()
+        syncCloud(context)
     }
 
     fun xpIntoCurrentLevel(context: Context): Int =

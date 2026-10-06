@@ -571,6 +571,71 @@ class DecisionOutputActivity : Activity() {
         )
 
         // ---------------------------------------------------------
+        // REWARDED XP
+        // ---------------------------------------------------------
+
+        val rewardedCard = glassCard()
+
+        val rewardedTitle = TextView(this).apply {
+            text = "🎁  WATCH & EARN"
+            textSize = 13f
+            setTextColor(gold)
+            setTypeface(null, Typeface.BOLD)
+        }
+
+        rewardedCard.addView(rewardedTitle)
+
+        rewardedCard.addView(
+            bodyText("Complete a short video • Earn +10 XP")
+        )
+
+        val rewardedButton = TextView(this).apply {
+            text = "WATCH  +10 XP"
+            textSize = 13f
+            setTextColor(bg)
+            setTypeface(null, Typeface.BOLD)
+            gravity = Gravity.CENTER
+            background = rounded(gold, 15)
+            elevation = dp(5).toFloat()
+            setPadding(
+                dp(12),
+                dp(4),
+                dp(12),
+                dp(4)
+            )
+
+            setOnClickListener {
+                GDMIEAudioManager.playUiClick(
+                    this@DecisionOutputActivity
+                )
+
+                RewardedAdManager.show(this@DecisionOutputActivity) { awarded ->
+                    Toast.makeText(
+                        this@DecisionOutputActivity,
+                        "+$awarded XP earned!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+        rewardedCard.addView(
+            rewardedButton,
+            marginParams(
+                0,
+                10,
+                0,
+                0,
+                dp(46)
+            )
+        )
+
+        content.addView(
+            rewardedCard,
+            marginParams(0, 0, 0, 14)
+        )
+
+        // ---------------------------------------------------------
         // HOME
         // ---------------------------------------------------------
 

@@ -1,8 +1,10 @@
 package com.gdmie
 
 import com.gdmie.audio.GDMIEAudioManager
+import com.google.firebase.auth.FirebaseAuth
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.media.MediaPlayer
 import android.graphics.Color
@@ -13,13 +15,15 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
 import android.widget.Toast
 
-class LoginActivity : Activity() {
+class LoginActivity : GDMIEBaseActivity() {
+    private val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     private val bg = Color.rgb(2, 5, 15)
     private val surface = Color.rgb(9, 17, 34)
@@ -57,7 +61,7 @@ class LoginActivity : Activity() {
             .alpha(1f)
             .scaleX(1f)
             .scaleY(1f)
-            .setDuration(900L)
+            .setDuration(300L)
             .setInterpolator(android.view.animation.DecelerateInterpolator(1.8f))
             .start()
 
@@ -74,8 +78,8 @@ class LoginActivity : Activity() {
                 .translationY(0f)
                 .scaleX(1f)
                 .scaleY(1f)
-                .setStartDelay(180L + (i * 95L))
-                .setDuration(650L)
+                .setStartDelay(40L + (i * 35L))
+                .setDuration(280L)
                 .setInterpolator(android.view.animation.DecelerateInterpolator(1.6f))
                 .start()
 
@@ -93,8 +97,8 @@ class LoginActivity : Activity() {
                         .translationY(0f)
                         .scaleX(1f)
                         .scaleY(1f)
-                        .setStartDelay(280L + (i * 95L) + (j * 55L))
-                        .setDuration(480L)
+                        .setStartDelay(70L + (i * 35L) + (j * 25L))
+                        .setDuration(220L)
                         .setInterpolator(android.view.animation.DecelerateInterpolator(1.5f))
                         .start()
                 }
@@ -118,7 +122,7 @@ class LoginActivity : Activity() {
                         .start()
                 }
                 .start()
-        }, 1050L)
+        }, 400L)
     }
 
     private fun createLogin(): View {
@@ -306,20 +310,6 @@ class LoginActivity : Activity() {
 
         loginCard.addView(cardTitle)
 
-        // Google
-        loginCard.addView(
-            loginButton(
-                "G",
-                "CONTINUE WITH GOOGLE",
-                blue,
-                true
-            ) {
-                showComingSoon()
-            }
-        )
-
-        addCardSpace(loginCard, 9)
-
         // Email
         loginCard.addView(
             loginButton(
@@ -328,21 +318,7 @@ class LoginActivity : Activity() {
                 surface2,
                 false
             ) {
-                showComingSoon()
-            }
-        )
-
-        addCardSpace(loginCard, 9)
-
-        // Phone
-        loginCard.addView(
-            loginButton(
-                "☎",
-                "CONTINUE WITH PHONE",
-                surface2,
-                false
-            ) {
-                showComingSoon()
+                showEmailAuthDialog()
             }
         )
 
@@ -428,6 +404,13 @@ class LoginActivity : Activity() {
 
             setOnClickListener {
                 isEnabled = false
+
+                getSharedPreferences("GDMIE_ACCOUNT", MODE_PRIVATE)
+                    .edit()
+                    .clear()
+                    .putString("login_method", "GUEST MODE")
+                    .putBoolean("guest_mode", true)
+                    .apply()
 
                 GDMIEAudioManager.playSfx(
                     this@LoginActivity,
@@ -639,6 +622,201 @@ class LoginActivity : Activity() {
                 dp(height)
             )
         )
+    }
+
+    private fun showEmailAuthDialog() {
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(8), dp(24), dp(8))
+        }
+
+        val emailInput = EditText(this).apply {
+            hint = "Email address"
+            textSize = 16f
+            setSingleLine(true)
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            setPadding(dp(4), 0, dp(4), 0)
+        }
+
+        val passwordInput = EditText(this).apply {
+            hint = "Password"
+            textSize = 16f
+            setSingleLine(true)
+            inputType =
+                android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            transformationMethod =
+                android.text.method.PasswordTransformationMethod.getInstance()
+            setPadding(dp(4), 0, dp(4), 0)
+        }
+
+        val passwordToggle = TextView(this).apply {
+            text = "SHOW PASSWORD"
+            textSize = 11f
+            setTextColor(cyan)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(2), 0, dp(8))
+
+            setOnClickListener {
+                val showing = passwordInput.transformationMethod == null
+
+                passwordInput.transformationMethod =
+                    if (showing) {
+                        android.text.method.PasswordTransformationMethod.getInstance()
+                    } else {
+                        null
+                    }
+
+                text = if (showing) "SHOW PASSWORD" else "HIDE PASSWORD"
+
+                passwordInput.setSelection(
+                    passwordInput.text.length
+                )
+            }
+        }
+
+        container.addView(
+            emailInput,
+            LinearLayout.LayoutParams(-1, dp(54)).apply {
+                bottomMargin = dp(10)
+            }
+        )
+
+        container.addView(
+            passwordInput,
+            LinearLayout.LayoutParams(-1, dp(54))
+        )
+
+        container.addView(
+            passwordToggle,
+            LinearLayout.LayoutParams(-1, dp(36))
+        )
+
+        AlertDialog.Builder(this)
+            .setTitle("GDMIE ACCOUNT")
+            .setMessage("Secure access with your email and password.")
+            .setView(container)
+            .setPositiveButton("LOGIN") { _, _ ->
+                loginWithEmail(
+                    emailInput.text.toString().trim(),
+                    passwordInput.text.toString()
+                )
+            }
+            .setNeutralButton("CREATE ACCOUNT") { _, _ ->
+                createAccountWithEmail(
+                    emailInput.text.toString().trim(),
+                    passwordInput.text.toString()
+                )
+            }
+            .setNegativeButton("FORGOT PASSWORD") { _, _ ->
+                sendPasswordReset(
+                    emailInput.text.toString().trim()
+                )
+            }
+            .show()
+    }
+
+    private fun loginWithEmail(email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            Toast.makeText(this, "Enter email and password", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        firebaseAuth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener { result ->
+                val user = result.user
+                saveFirebaseAccount(user?.displayName, user?.email)
+                Toast.makeText(this, "ACCESS GRANTED", Toast.LENGTH_SHORT).show()
+                openHomeAfterAuth()
+            }
+            .addOnFailureListener { error ->
+                Toast.makeText(
+                    this,
+                    error.message ?: "Login failed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+    }
+
+    private fun createAccountWithEmail(email: String, password: String) {
+        if (email.isBlank() || password.length < 6) {
+            Toast.makeText(
+                this,
+                "Use a valid email and password of at least 6 characters",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+            .addOnSuccessListener { result ->
+                val user = result.user
+                saveFirebaseAccount(user?.displayName, user?.email)
+                Toast.makeText(this, "ACCOUNT CREATED", Toast.LENGTH_SHORT).show()
+                openHomeAfterAuth()
+            }
+            .addOnFailureListener { error ->
+                Toast.makeText(
+                    this,
+                    error.message ?: "Account creation failed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+    }
+
+    private fun openHomeAfterAuth() {
+        GDMIECloudProfile.loadProfile(this) {
+            GDMIECloudProfile.syncProfile(this)
+
+            startActivity(
+                Intent(
+                    this@LoginActivity,
+                    MainActivity::class.java
+                )
+            )
+            overridePendingTransition(0, 0)
+            finish()
+        }
+    }
+
+    private fun sendPasswordReset(email: String) {
+        if (email.isBlank()) {
+            Toast.makeText(
+                this,
+                "Enter your email first",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        firebaseAuth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {
+                Toast.makeText(
+                    this,
+                    "PASSWORD RESET EMAIL SENT\nCheck your Gmail Inbox or Spam folder for the reset link.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .addOnFailureListener { error ->
+                Toast.makeText(
+                    this,
+                    error.message ?: "Unable to send reset email",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+    }
+
+    private fun saveFirebaseAccount(displayName: String?, email: String?) {
+        getSharedPreferences("GDMIE_ACCOUNT", MODE_PRIVATE)
+            .edit()
+            .putString("display_name", displayName ?: "GDMIE EXPLORER")
+            .putString("email", email ?: "")
+            .putString("login_method", "EMAIL")
+            .putBoolean("guest_mode", false)
+            .apply()
     }
 
     private fun showComingSoon() {

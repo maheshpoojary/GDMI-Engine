@@ -1390,6 +1390,48 @@ class LiveAnalysisActivity : Activity() {
         }
         content.addView(xpButton)
 
+        // ============================================================
+        // REWARDED XP — OPTIONAL EXTRA REWARD
+        // ============================================================
+
+        val rewardedButton = actionButton(
+            "🎁  WATCH +10 XP",
+            gold
+        )
+
+        rewardedButton.setOnClickListener {
+            GDMIEAudioManager.playUiClick(this)
+
+            RewardedAdManager.show(this) { awarded ->
+                android.widget.Toast.makeText(
+                    this,
+                    "+$awarded XP earned!",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        content.addView(
+            rewardedButton,
+            ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(56)
+            )
+        )
+
+        content.addView(
+            tv(
+                "Optional • Watch a short video to earn extra XP.",
+                10f,
+                muted
+            ).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(8), 0, 0)
+            }
+        )
+
+        content.addView(space(10))
+
         content.addView(
             tv(
                 "Every new LIVE ANALYSIS creates a fresh scenario.",

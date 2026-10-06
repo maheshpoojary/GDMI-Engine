@@ -21,6 +21,13 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
+import com.google.android.ump.ConsentInformation
+import com.google.android.ump.ConsentRequestParameters
+import com.google.android.ump.UserMessagingPlatform
+
 
 
 private class GDMIEHomeWorldDrawable(
@@ -641,10 +648,43 @@ class MainActivity : Activity() {
     // MAIN
     // ------------------------------------------------------------
 
+    private fun initializePrivacyAndAds() {
+        val consentInformation =
+            UserMessagingPlatform.getConsentInformation(this)
+
+        val params =
+            ConsentRequestParameters.Builder()
+                .build()
+
+        consentInformation.requestConsentInfoUpdate(
+            this,
+            params,
+            {
+                UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                    this
+                ) {
+                    if (consentInformation.canRequestAds()) {
+                        MobileAds.initialize(this) {}
+                        RewardedAdManager.preload(this)
+                    }
+                }
+            },
+            {
+                if (consentInformation.canRequestAds()) {
+                    MobileAds.initialize(this) {}
+                    RewardedAdManager.preload(this)
+                }
+            }
+        )
+    }
+
     override fun onCreate(
         savedInstanceState: Bundle?
     ) {
         super.onCreate(savedInstanceState)
+
+        // PRIVACY CONSENT + ADMOB
+        initializePrivacyAndAds()
 
         window.statusBarColor = bg
         window.navigationBarColor = bg
@@ -976,6 +1016,103 @@ class MainActivity : Activity() {
             LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 dp(84)
+            )
+        )
+
+        root.addView(gap(18))
+
+        // ========================================================
+        // REWARDED XP — OPTIONAL HOME REWARD
+        // ========================================================
+
+        val rewardedCard = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(15), dp(12), dp(12), dp(12))
+            background = rounded(
+                Color.argb(120, 18, 29, 55),
+                20,
+                gold,
+                1
+            )
+            elevation = dp(6).toFloat()
+        }
+
+        val rewardedText = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        rewardedText.addView(
+            tv(
+                "🎁 WATCH & EARN",
+                10f,
+                gold,
+                true
+            )
+        )
+
+        rewardedText.addView(
+            tv(
+                "Complete a short video • Earn +10 XP",
+                9f,
+                white
+            ).apply {
+                setPadding(0, dp(5), 0, 0)
+            }
+        )
+
+        rewardedCard.addView(
+            rewardedText,
+            LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        )
+
+        val rewardedButton = Button(this).apply {
+            text = "WATCH  +10 XP"
+            textSize = 9.5f
+            isAllCaps = false
+            setTextColor(white)
+            typeface = Typeface.DEFAULT_BOLD
+            letterSpacing = 0.03f
+            background = rounded(
+                gold,
+                14,
+                white,
+                1
+            )
+            elevation = dp(4).toFloat()
+
+            setOnClickListener {
+                GDMIEAudioManager.playUiClick(this@MainActivity)
+
+                RewardedAdManager.show(this@MainActivity) { awarded ->
+                    updateHomeOverview()
+
+                    Toast.makeText(
+                        this@MainActivity,
+                        "+$awarded XP earned!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+        rewardedCard.addView(
+            rewardedButton,
+            LinearLayout.LayoutParams(
+                dp(112),
+                dp(46)
+            )
+        )
+
+        root.addView(
+            rewardedCard,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(82)
             )
         )
 
@@ -1508,12 +1645,16 @@ decisionHub.addView(
         "CHALLENGE",
         gold
     ) {
-        startActivity(
-            Intent(
-                this@MainActivity,
-                DecisionChallengeActivity::class.java
+        if (isGuestMode()) {
+            showGuestAccountPrompt()
+        } else {
+            startActivity(
+                Intent(
+                    this@MainActivity,
+                    DecisionChallengeActivity::class.java
+                )
             )
-        )
+        }
     },
     LinearLayout.LayoutParams(
         0,
@@ -1546,12 +1687,16 @@ root.addView(gap(22))
             isFocusable = true
             setOnClickListener {
             GDMIEAudioManager.playUiClick(this@MainActivity)
-                startActivity(
-                    Intent(
-                        this@MainActivity,
-                        LiveAnalysisActivity::class.java
+                if (isGuestMode()) {
+                    showGuestAccountPrompt()
+                } else {
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            LiveAnalysisActivity::class.java
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -1905,6 +2050,11 @@ liveHeader.addView(liveStatus)
             isFocusable = true
 
             setOnClickListener {
+            if (isGuestMode()) {
+                showGuestAccountPrompt()
+                return@setOnClickListener
+            }
+
             GDMIEAudioManager.playUiClick(this@MainActivity)
                 animate()
                     .scaleX(0.97f)
@@ -2300,24 +2450,32 @@ liveHeader.addView(liveStatus)
             "Challenge",
             false
         ) {
-            startActivity(
-                Intent(
-                    this@MainActivity,
-                    DecisionChallengeActivity::class.java
+            if (isGuestMode()) {
+                showGuestAccountPrompt()
+            } else {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        DecisionChallengeActivity::class.java
+                    )
                 )
-            )
+            }
         }
 
         bottomNavItem(
             "Analyze",
             false
         ) {
-            startActivity(
-                Intent(
-                    this@MainActivity,
-                    LiveAnalysisActivity::class.java
+            if (isGuestMode()) {
+                showGuestAccountPrompt()
+            } else {
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        LiveAnalysisActivity::class.java
+                    )
                 )
-            )
+            }
         }
 
         bottomNavItem(
@@ -2348,6 +2506,24 @@ liveHeader.addView(liveStatus)
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+        )
+
+        val adView = AdView(this).apply {
+            setAdSize(com.google.android.gms.ads.AdSize.BANNER)
+            adUnitId = "ca-app-pub-9089838217001612/55567628158"
+        }
+
+        adView.loadAd(AdRequest.Builder().build())
+
+        frame.addView(
+            adView,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(50),
+                Gravity.BOTTOM
+            ).apply {
+                setMargins(dp(10), 0, dp(10), dp(72))
+            }
         )
 
         frame.addView(
@@ -2414,4 +2590,32 @@ liveHeader.addView(liveStatus)
 
         updateHomeOverview()
     }
+
+    private fun isGuestMode(): Boolean {
+        return getSharedPreferences(
+            "GDMIE_ACCOUNT",
+            MODE_PRIVATE
+        ).getBoolean("guest_mode", false)
+    }
+
+    private fun showGuestAccountPrompt() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("🔐 GDMIE ACCOUNT")
+            .setMessage(
+                "Save your progress.\n\n" +
+                "Keep your XP, Level, Streak\n" +
+                "and decision history."
+            )
+            .setPositiveButton("CONTINUE WITH EMAIL →") { _, _ ->
+                startActivity(
+                    Intent(
+                        this@MainActivity,
+                        LoginActivity::class.java
+                    )
+                )
+            }
+            .setNegativeButton("NOT NOW", null)
+            .show()
+    }
+
 }
